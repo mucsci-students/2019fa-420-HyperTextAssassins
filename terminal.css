@@ -1,0 +1,65 @@
+body {
+	overflow: hidden;
+	background-color: black;
+	font-size: 16px;
+	font-family: "Courier New";
+}
+
+
+#terminal {
+	width: 800px;
+	height: 400px;
+	text-align: left;
+	margin: auto;
+	position: relative;
+	top: 0;
+	bottom: 0;
+	overflow: hidden;
+	color: red;
+	border: solid;
+	background-color: black;
+}
+
+#log {
+	font-size: 16px;
+	width: 100%;
+	height: 376px;
+	padding: 2px;
+	background-color: black;
+	border: transparent;
+	color: red;
+	position: relative;
+	padding-top: 0px;
+	resize:none;
+}
+
+#entry {
+	width: 800px;
+	text-align: left;
+	vertical-align: bottom;
+	margin-top: 0;
+	margin-bottom: 0;
+	position: absolute;
+	bottom: 0;
+	overflow: hidden;
+	color: red;
+	border-top: solid;
+}
+
+#entry label {
+	width: 10px;
+	height: 20px;
+	padding: 1px;
+	float:left;
+}
+
+#command {
+	font-size: 16px;
+	width: 786px;
+	height: 20px;
+	padding: 1px;
+	background-color: black;
+	border: transparent;
+	color: red;
+	position: relative;
+}

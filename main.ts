@@ -1,12 +1,16 @@
 $(function() {
-	//Vars
+	//vars
 
-	//Do at start
+	//do on page load
+
 	$("#log").val("UML Terminal\n>help");
 	$("#command").focus();
 
-	//Do on event
+	//do on event
+
+	//runs every time key is pressed when #command is focus
 	$("#command").on('keypress', function(e) {
+		//checks if enter key is pressed
 		if(e.which === 13) {
 			let command : JQuery = $("#command");
 			doCommand(<string>command.val());
@@ -17,6 +21,10 @@ $(function() {
 
 //called functions
 
+/** help (string)
+ * is called when user gives an arguement to the help command
+ * returns a string explaining specified command to the user
+**/
 function help(cmd : string) {
 	switch (cmd){
 		case "clear":
@@ -29,13 +37,19 @@ function help(cmd : string) {
 	}
 }
 
+/** doCommand (string)
+ * checks user input for command and executes it if it exists
+ * otherwise only returns users input
+**/
 function doCommand(command : string){
 	let log : JQuery = $("#log");
 		
 	log.val(log.val() + "\n>" + command);
-			
-	let args : Array<string> = (command.split(" "));
-	
+
+	//reg expression for split to allow any number of spaces
+	command = command.toLocaleLowerCase();
+	let args : Array<string> = (command.split(/\s{1,}/));
+
 	switch (args[0]) {
 		case "clear":
 			log.val("")	
@@ -45,7 +59,9 @@ function doCommand(command : string){
 			if (args.length > 1){
 				log.val(log.val() + "\n" + help(args[1]));
 			} else {
-				log.val(log.val() + "\n" + "There is no help")
+				log.val(log.val() + "\n" + "list of commands\n"
+					+ ">clear\n"
+					+ "type >help <command> for instructions on that command")
 			}
 		break;
 	}

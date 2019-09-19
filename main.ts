@@ -57,13 +57,21 @@ function doCommand(command : string){
 
 		case "help":
 			if (args.length > 1){
-				log.val(log.val() + "\n" + help(args[1]));
+				apdLog(help(args[1]), log);
 			} else {
-				log.val(log.val() + "\n" + "list of commands\n"
-					+ ">clear\n"
-					+ "type >help <command> for instructions on that command")
+				apdLog(("list of commands\n"
+						+ ">clear\n"
+						+ "type >help <command> for instructions on that command")
+				, log);
 			}
 		break;
 	}
 	log.scrollTop(log[0].scrollHeight);	
+}
+
+/** apdLog (string, JQuery textfield)
+ * Appends a string to the consoles log on a new line
+**/
+function apdLog(newText : string, log : JQuery){
+	log.val(log.val() + "\n" + newText);
 }

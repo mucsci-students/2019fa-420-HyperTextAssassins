@@ -1,8 +1,37 @@
 class classBlock {
-    className: string;
-    constuctor (name: string)
-    {
-        this.className = name;
-    }
-    
-}
+    	public name : string;
+
+	    constructor (name : string) {
+    		this.name = name;
+		}
+		
+		print()
+		{
+			
+		}
+
+		getter()
+		{
+
+		}
+
+		setter()
+		{
+
+		}
+
+		editName()
+		{
+
+		}
+
+		undo()
+		{
+
+		}
+
+		redo()
+		{
+
+		}
+	}

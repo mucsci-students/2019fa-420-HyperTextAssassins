@@ -63,3 +63,7 @@ body {
 	color: red;
 	position: relative;
 }
+
+.hidden {
+	display: none;
+}

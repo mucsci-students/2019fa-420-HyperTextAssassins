@@ -1,3 +1,7 @@
+/// <reference path="classblock.ts" />
+
+let userClasses = new Map();
+
 $(function() {
 	//vars
 
@@ -5,7 +9,7 @@ $(function() {
 
 	$("#log").val("UML Terminal\n>help");
 	$("#command").focus();
-	
+
 	//do on event
 
 	//runs every time key is pressed when #command is focus
@@ -28,12 +32,32 @@ $(function() {
 function help(cmd : string) {
 	switch (cmd){
 		case "clear":
-			return "Clears terminal log";
+			return ">clear\n"
+			+ " Clears terminal log";
 		break;
 
 		case "help":
-			return "Is helpful";
+			return ">help\n"
+			+ " Is helpful";
 		break;
+
+		case "create":
+			return ">create\n"
+			 + " Creates a block";
+		break;
+
+		case "printall":
+			return ">printall\n"
+			+ " Prints all current classes and their information";
+		break;
+
+		case "rename":
+			return ">rename <targetclass> <newname>\n"
+			+ " Changes a classes name";
+		break;
+
+		default:
+			return cmd + " is not a command"
 	}
 }
 
@@ -41,14 +65,14 @@ function help(cmd : string) {
  * checks user input for command and executes it if it exists
  * otherwise only returns users input
 **/
-function doCommand(command : string){
+function doCommand(command : string) {
 	let log : JQuery = $("#log");
 		
-	apdLog(command, log);
+	apdLog(">" + command, log);
 
 	//reg expression for split to allow any number of spaces
-	command = command.toLocaleLowerCase();
 	let args : Array<string> = (command.split(/\s{1,}/));
+	args[0] = args[0].toLocaleLowerCase();
 
 	switch (args[0]) {
 		case "clear":
@@ -56,15 +80,42 @@ function doCommand(command : string){
 		break;
 
 		case "help":
-			if (args.length > 1){
+			if (args.length > 1) {
 				apdLog(help(args[1]), log);
 			} else {
 				apdLog(("list of commands\n"
 						+ ">clear\n"
+						+ ">create\n"
+						+ ">rename\n"
+						+ ">printall\n"
 						+ "type >help <command> for instructions on that command")
 				, log);
 			}
 		break;
+
+		case "create":
+			if (userClasses.has(args[1])) {
+				apdLog("Name already in use. Please enter unique name.", log);
+			} else {
+				userClasses.set(args[1], new classBlock(args[1]));
+				apdLog(userClasses.get(args[1]).getName() + " created", log);
+			}
+		break;
+
+		case "printall":
+			userClasses.forEach((block : classBlock) => {
+				apdLog(block.print(), log);
+			});
+		break;
+
+		case "rename":
+			if (args.length != 3) {
+				apdLog("Please use this format: >rename <targetclass> <newname>", log);
+				break;
+			}
+			apdLog(rename(args[1], args[2]), log);
+		break;
+
 		//used to access loading a file.
 		case "loadfile":
 			$("#inputFile").removeClass('hidden');
@@ -72,6 +123,20 @@ function doCommand(command : string){
 		break;
 	}
 	log.scrollTop(log[0].scrollHeight);	
+}
+
+/** rename (string, string) returns string
+ * Renames a class
+**/
+function rename (oldName : string, newName : string) {
+	if(userClasses.has(newName)) {
+		return "Please enter a unique class name";
+	} else {
+		userClasses.get(oldName).setName(newName);
+		userClasses.set(newName, userClasses.get(oldName));
+		userClasses.delete(oldName);
+		return ("Changed the name of class " + oldName + " to " + newName);
+	}
 }
 
 /**

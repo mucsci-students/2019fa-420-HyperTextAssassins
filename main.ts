@@ -116,6 +116,14 @@ function doCommand(command : string) {
 			apdLog(rename(args[1], args[2]), log);
 		break;
 
+		case "save":
+			saveFile();
+		break;
+
+		case "load":
+			loadFile();
+		break;
+
 		//used to access loading a file.
 		case "loadfile":
 			$("#inputFile").removeClass('hidden');
@@ -144,20 +152,24 @@ function rename (oldName : string, newName : string) {
  * 		of a file into the html textarea.
  */
 function loadFile() {
-	$("#text").removeClass('hidden');
-	$("#save").removeClass('hidden');
-
 	// Grabs the file selected from the file input button.
 	var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
 
 	// Using a FileReader to read the contents of the file as regular text.
 	var fileReader = new FileReader();
-    fileReader.onload = function(fileLoadedEvent){
+	fileReader.onload = function(fileLoadedEvent){
 		var textFromFile = fileLoadedEvent.target.result;
 		// Printing the text into the textarea.
 		(<HTMLInputElement>document.getElementById("text")).value = <string>textFromFile;
+
+		userClasses.clear();
+		let test : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
+		for (let i : number = 0; i < test.length; i++) {
+			userClasses.set(test[i][0], new classBlock(test[i][1]["name"]));
+		}
+
 	};
-	
+
 	fileReader.readAsText(File, "UTF-8");
 
 }
@@ -166,11 +178,12 @@ function loadFile() {
  * Saves the text from the textarea into a new YAML file.
  */
 function saveFile() {
-	var textContent = (<HTMLInputElement>document.getElementById("text")).value;
+	//var textContent = (<HTMLInputElement>document.getElementById("text")).value;
+	let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
 
 	// The octet-stream indicates a binary file.
 	// The URI encoder will encode the UTF-8 text.
-	var uriContent = "data:application/octet-stream," + encodeURIComponent(textContent);
+	var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
 	
 	// Creates a clickable link to either open or save the file that was just create.
     document.getElementById("link").innerHTML = "<a href=" + uriContent + " download=\"diagram.yml\">click me</a>";

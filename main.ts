@@ -126,6 +126,8 @@ function doCommand(command : string) {
 		case "create":
 			if (userClasses.has(args[1])) {
 				apdLog("Name already in use. Please enter unique name.", log);
+			} else if (args.length < 2 || args[1] == "") {
+				apdLog("Please enter a name after create, type <help> <create> for more info", log);
 			} else {
 				userClasses.set(args[1], new classBlock(args[1]));
 				apdLog(userClasses.get(args[1]).getName() + " created", log);

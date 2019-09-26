@@ -37,13 +37,23 @@ function help(cmd : string) {
 		break;
 
 		case "help":
-			return ">help\n"
+			return ">help <command>\n"
 			+ " Is helpful";
 		break;
 
 		case "create":
-			return ">create\n"
+			return ">create <classname>\n"
 			 + " Creates a block";
+		break;
+
+		case "delete":
+			return ">delete <classname>\n"
+			 + " Deletes target class";
+		break;
+
+		case "print":
+			return ">print <targetclass>\n"
+			+ " Prints information on target class";
 		break;
 
 		case "printall":
@@ -54,6 +64,21 @@ function help(cmd : string) {
 		case "rename":
 			return ">rename <targetclass> <newname>\n"
 			+ " Changes a classes name";
+		break;
+
+		case "save":
+			return ">save\n"
+			 + " Prompts user to save diagram as .yml file";
+		break;
+
+		case "load":
+			return ">load\n"
+			 + " Loads diagram from loaded .yml file";
+		break;
+
+		case "loadfile":
+			return ">loadfile\n"
+			 + " Reveals a button that prompts for a file";
 		break;
 
 		default:
@@ -86,8 +111,13 @@ function doCommand(command : string) {
 				apdLog(("list of commands\n"
 						+ ">clear\n"
 						+ ">create\n"
+						+ ">delete\n"
 						+ ">rename\n"
+						+ ">print\n"
 						+ ">printall\n"
+						+ ">save\n"
+						+ ">load\n"
+						+ ">loadfile\n"
 						+ "type >help <command> for instructions on that command")
 				, log);
 			}
@@ -99,6 +129,23 @@ function doCommand(command : string) {
 			} else {
 				userClasses.set(args[1], new classBlock(args[1]));
 				apdLog(userClasses.get(args[1]).getName() + " created", log);
+			}
+		break;
+
+		case "delete":
+			if (userClasses.has(args[1])) {
+				userClasses.delete(args[1]);
+				apdLog(args[1] + " deleted", log);
+			} else {
+				apdLog(args[1] + " class does not exist", log);
+			}
+		break;
+
+		case "print":
+			if (userClasses.has(args[1])) {
+				apdLog(userClasses.get(args[1]).print(), log);
+			} else {
+				apdLog(args[1] + " class does not exist", log);
 			}
 		break;
 

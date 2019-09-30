@@ -12,6 +12,11 @@ $(function() {
 
 	//do on event
 
+	/** Listens to inputFile and loads a file selected from windows prompt
+	 * Basically a way to seperate selecting a file from actually loading it
+	**/
+	$("#inputFile").on("change", function () {loadFile();});
+
 	//runs every time key is pressed when #command is focus
 	$("#command").on('keypress', function(e) {
 		//checks if enter key is pressed
@@ -117,7 +122,6 @@ function doCommand(command : string) {
 						+ ">printall\n"
 						+ ">save\n"
 						+ ">load\n"
-						+ ">loadfile\n"
 						+ "type >help <command> for instructions on that command")
 				, log);
 			}
@@ -161,6 +165,9 @@ function doCommand(command : string) {
 			if (args.length != 3) {
 				apdLog("Please use this format: >rename <targetclass> <newname>", log);
 				break;
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
 			}
 			apdLog(rename(args[1], args[2]), log);
 		break;
@@ -170,13 +177,11 @@ function doCommand(command : string) {
 		break;
 
 		case "load":
-			loadFile();
+			selectFile();
 		break;
 
-		//used to access loading a file.
-		case "loadfile":
-			$("#inputFile").removeClass('hidden');
-			$("#load").removeClass('hidden');
+		default:
+			apdLog(args[0] + " is not a command", log);
 		break;
 	}
 	log.scrollTop(log[0].scrollHeight);	
@@ -201,26 +206,30 @@ function rename (oldName : string, newName : string) {
  * 		of a file into the html textarea.
  */
 function loadFile() {
+
 	// Grabs the file selected from the file input button.
-	var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
+	//var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
+
+	let inputFile = $("#inputFile");
+
+	var file : File = inputFile.prop('files')[0];
 
 	// Using a FileReader to read the contents of the file as regular text.
-	var fileReader = new FileReader();
+	var fileReader : FileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
 		var textFromFile = fileLoadedEvent.target.result;
-		// Printing the text into the textarea.
-		(<HTMLInputElement>document.getElementById("text")).value = <string>textFromFile;
-
 		userClasses.clear();
-		let test : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
-		for (let i : number = 0; i < test.length; i++) {
-			userClasses.set(test[i][0], new classBlock(test[i][1]["name"]));
+		let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
+		for (let i : number = 0; i < yaml.length; i++) {
+			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
 		}
+	}
+	fileReader.readAsText(file, "UTF-8");
 
-	};
+}
 
-	fileReader.readAsText(File, "UTF-8");
-
+function selectFile() {
+	$("#inputFile").click();
 }
 
 /**
@@ -235,7 +244,8 @@ function saveFile() {
 	var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
 	
 	// Creates a clickable link to either open or save the file that was just create.
-    document.getElementById("link").innerHTML = "<a href=" + uriContent + " download=\"diagram.yml\">click me</a>";
+	document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
+	document.getElementById("link").click();
 }
 
 /** apdLog (string, JQuery textfield)

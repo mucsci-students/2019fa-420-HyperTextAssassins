@@ -1,0 +1,40 @@
+body{
+	border: 10px;
+	width: 1000px;
+	height: 1000px;
+	margin: 0;
+}
+
+.classblock{
+	width: 150px;
+	height: 250px; 
+	border-style: solid;
+	border-width: 1px;
+	border-color: black;
+	text-align: center;
+}
+
+#FirstClass{
+	background-color: magenta;
+}
+
+#thing2{
+	background-color: yellow;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#toolbar{
+	border-right: 2px;
+	height: 100%;
+	width: 50px;
+	background-color: turquoise;
+}
+
+#button{
+	height: 50px;
+	Width: 90%;
+	margin: 5%;
+	border: 10px solid coral;
+
+}

@@ -205,6 +205,17 @@ function doCommand(command : string) {
 			apdLog(getParent(args[1]), log);
 		break;
 
+		case "removeparent":
+			if (args.length != 2) {
+				apdLog("format: >removeparent <targetclass>", log);
+				break;
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
+			}
+			apdLog(removeParent(args[1]), log);
+		break;
+
 		case "addchild":
 			if (args.length < 3) {
 				apdLog("format: >addchild <targetclass> <childclass>", log);
@@ -227,6 +238,20 @@ function doCommand(command : string) {
 				break;
 			}
 			apdLog(getChildren(args[1]), log)
+		break;
+
+		case "deletechild":
+			if (args.length != 3) {
+				apdLog("format: >getchildren <targetclass>", log);
+				break;
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
+			} else if (!userClasses.has(args[2])) {
+				apdLog(args[2] + " does not exist", log);
+				break;
+			}
+			apdLog(deleteChild(args[1], args[2]), log)
 		break;
 
 		default:
@@ -262,6 +287,17 @@ function addChild(targetClass : string, childClass : string)
 }
 
 /**
+ * Allows you to remove a child from a parents children array.
+ * @param targetClass 
+ * @param childClass 
+ */
+function deleteChild(targetClass : string, childClass : string)
+{
+	userClasses.get(targetClass).removeChild(childClass);
+	return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+}
+
+/**
  * Returns the parent of a specific class block.
  * @param targetClass 
  */
@@ -283,6 +319,16 @@ function addParent(targetClass : string, parentClass : string)
 	userClasses.get(targetClass).setParent(parentClass);
 	userClasses.get(parentClass).addChild(targetClass);
 	return ("Added " + parentClass + " as the parent for " + targetClass);
+}
+
+/**
+ * Removes the current parent of the targetClass.
+ * @param targetClass 
+ */
+function removeParent(targetClass : string)
+{
+	userClasses.get(targetClass).removeParent();
+	return ("Removed the parent of " + targetClass + ".");
 }
 /** rename (string, string) returns string
  * Renames a class

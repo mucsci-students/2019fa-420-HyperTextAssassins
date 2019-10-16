@@ -12,16 +12,12 @@ $(function() {
 
 	//do on event
 
-	$("body").click(function(){
-		let firstClass = "FirstClass";
-		$("body").append("<div class= \"classblock\" id =\"" + firstClass + "\"> classblock </div>");
-		console.log("Did thing");
+	$("#button").click(function(){
 
-		
-		let thing2 = "thing2";	
-		//Bug: Overwrites first div, should create a second div
-		$("body").append("<div class= \"classblock\" id =\"" + thing2 + "\"> classblock </div>");
-		console.log("Did thing");
+		let firstClass = "FirstClass";
+		$("#blockArea").append("<div class= \"classblock\" id =\"" + firstClass + "\"> classblock </div>");
+		console.log("Added one classblock");
+
 	});
 
 	/** Listens to inputFile and loads a file selected from windows prompt

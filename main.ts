@@ -1,4 +1,4 @@
-/// <reference path="classblock.ts" />
+/// <reference path="classBlock.ts" />
 
 let userClasses = new Map();
 
@@ -180,6 +180,55 @@ function doCommand(command : string) {
 			selectFile();
 		break;
 
+		case "addparent":
+			if (args.length != 3) {
+				apdLog("format: >addparent <targetclass> <parentclass>", log);
+				break;
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
+			} else if (!userClasses.has(args[2])) {
+				apdLog(args[2] + " does not exist", log);
+				break;
+			}
+			apdLog(addParent(args[1], args[2]), log);
+		break;
+		
+		case "getparent":
+			if (args.length != 2) {
+				apdLog("format: >getparent <targetclass>", log);
+				break;
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
+			}
+			apdLog(getParent(args[1]), log);
+		break;
+
+		case "addchild":
+			if (args.length < 3) {
+				apdLog("format: >addchild <targetclass> <childclass>", log);
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
+			} else if (!userClasses.has(args[2])) {
+				apdLog(args[2] + " does not exist", log);
+				break;
+			}
+			apdLog(addChild(args[1], args[2]), log)
+		break;
+
+		case "getchildren":
+			if (args.length != 2) {
+				apdLog("format: >getchildren <targetclass>", log);
+				break;
+			} else if (!userClasses.has(args[1])) {
+				apdLog(args[1] + " does not exist", log);
+				break;
+			}
+			apdLog(getChildren(args[1]), log)
+		break;
+
 		default:
 			apdLog(args[0] + " is not a command", log);
 		break;
@@ -187,6 +236,54 @@ function doCommand(command : string) {
 	log.scrollTop(log[0].scrollHeight);	
 }
 
+/**
+ * Returns the array of children for a specific class block.
+ * @param targetClass 
+ */
+function getChildren(targetClass : string)
+{
+	var array = userClasses.get(targetClass).getChildren();
+	if(array.length <= 0) {
+		return ("This class has no children");
+	}
+	return ("children: " + array);
+}
+
+/**
+ * Adds a child class to a specific class block.
+ * @param targetClass 
+ * @param childClass 
+ */
+function addChild(targetClass : string, childClass : string)
+{
+	userClasses.get(targetClass).addChild(childClass);
+	userClasses.get(childClass).addParent(targetClass);
+	return ("added " + childClass + " as a child to " + targetClass + ".");
+}
+
+/**
+ * Returns the parent of a specific class block.
+ * @param targetClass 
+ */
+function getParent(targetClass : string)
+{
+	if(userClasses.get(targetClass).getParent() == null) {
+		return ("There is no parent class for " + targetClass + ".");
+	}
+	return ("The parent of " + targetClass + " is " + userClasses.get(targetClass).getParent() + ".");
+}
+
+/**
+ * Adds a parent to a specific class block.
+ * @param targetClass 
+ * @param parentClass 
+ */
+function addParent(targetClass : string, parentClass : string)
+{
+	userClasses.get(targetClass).setParent(parentClass);
+	userClasses.get(parentClass).addChild(targetClass);
+	return ("Added " + parentClass + " as the parent for " + targetClass);
+}
 /** rename (string, string) returns string
  * Renames a class
 **/

@@ -1,5 +1,7 @@
 class classBlock {
 	private name : string;
+	private parent: string = null;
+	private children : string[] = new Array();
 
 	constructor (name : string) {
 		this.name = name;
@@ -29,5 +31,41 @@ class classBlock {
 	{
 		this.name = name;
 		return true;
+	}
+
+	/**
+	 * Allows you to set the parent of the classblock.
+	 * @param parent 
+	 */
+	setParent(parent: string)
+	{
+		this.parent = parent;
+		return true;
+	}
+
+	/**
+	 * Returns the parent of the classblock.
+	 */
+	getParent()
+	{
+		return this.parent;
+	}
+
+	/**
+	 * Allows you to add a classblock to the children's array.
+	 * @param child 
+	 */
+	addChild(child: string)
+	{
+		this.children.push(child);
+		return true;
+	}
+	
+	/**
+	 * Returns the children of the classblock.
+	 */
+	getChildren() 
+	{
+		return this.children;
 	}
 }

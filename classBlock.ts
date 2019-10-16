@@ -32,7 +32,6 @@ class classBlock {
 		this.name = name;
 		return true;
 	}
-
 	/**
 	 * Allows you to set the parent of the classblock.
 	 * @param parent 
@@ -44,13 +43,21 @@ class classBlock {
 	}
 
 	/**
+	 * Set the current parent to NULL.
+	 */
+	removeParent()
+	{
+		this.parent = null;
+		return true;
+	}
+
+	/**
 	 * Returns the parent of the classblock.
 	 */
 	getParent()
 	{
 		return this.parent;
 	}
-
 	/**
 	 * Allows you to add a classblock to the children's array.
 	 * @param child 
@@ -60,7 +67,6 @@ class classBlock {
 		this.children.push(child);
 		return true;
 	}
-	
 	/**
 	 * Returns the children of the classblock.
 	 */
@@ -68,4 +74,18 @@ class classBlock {
 	{
 		return this.children;
 	}
+
+	/**
+	 * Removes a specific child from the childrens array.
+	 * @param child 
+	 */
+	removeChild(child: string)
+	{
+		var index = this.children.indexOf(child);
+		this.children.splice(index, 1);
+		return true;
+	}
 }
+
+
+

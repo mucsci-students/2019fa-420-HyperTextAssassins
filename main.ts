@@ -14,11 +14,16 @@ $(function() {
 
 	$("#button").click(function(){
 
-		let firstClass = "FirstClass";
-		$("#blockArea").append("<div class= \"classblock\" id =\"" + firstClass + "\"> classblock </div>");
-		console.log("Added one classblock");
+		let name = prompt("Please enter class name", "Class");
+		let firstClass = "firstClass";
+		$("#blockArea").append("<div class= \"classblock\" id =\"" + firstClass +
+		 "\"> <form> <select id =\"dropdown\" onchange=\"dropdownClick()\" value=\"Select an option\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option> </select> </form>\"" + name +  "</div>");
 
+		 
 	});
+
+	
+	
 
 	/** Listens to inputFile and loads a file selected from windows prompt
 	 * Basically a way to seperate selecting a file from actually loading it
@@ -42,6 +47,30 @@ $(function() {
  * is called when user gives an arguement to the help command
  * returns a string explaining specified command to the user
 **/
+
+function dropdownClick(){
+	console.log("Clicked dropdown")
+	let x = $("#dropdown").val();
+	let input ="";
+	if (input != null && x != "child "){
+		let input = prompt("Please enter the " + x + "to add")
+		$(".classblock").append("<p>\"" + input + "\" </p>");
+	} else if (x == "child "){
+		let connectParent = prompt("Please enter the name of the parent to connect to");
+	} else if (x == "delete "){
+		let deleteClass = prompt("Please enter the name of the class to be deleted");
+		$(deleteClass).remove();
+	}
+}
+
+function addAttribute() {
+	console.log("clicked button");
+	let input = prompt("Please enter attribute name", "Attribute");
+	if (input != null) {
+		$(".classblock").append("<p>\"" + input + "\" </p>");
+	}	
+}
+
 function help(cmd : string) {
 	switch (cmd){
 		case "clear":

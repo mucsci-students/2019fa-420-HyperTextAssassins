@@ -22,9 +22,16 @@ body{
 	display: inline-block;
 }
 
-#FirstClass{
+#firstClass{
 	background-color: yellow;
 	position: relative;
+	text-align: center;
+}
+
+.child{
+	background-color: green;
+	position: relative;
+	text-align: center;
 }
 
 #toolbar{
@@ -33,7 +40,7 @@ body{
 	width: 50px;
 	background-color: turquoise;
 	margin: 0px;
-	margin-right: 10px;
+	margin-right: 5px;
 	float: left;
 }
 
@@ -51,3 +58,20 @@ body{
 	background-color: salmon;
 
 }
+
+#attributeButton{
+	text-align: center;
+	position: relative;
+	top: 225px;
+}
+
+#dropdown{
+	top: 150px;
+	align-content: bottom;
+}
+
+form{
+	top: 100px;
+}
+
+

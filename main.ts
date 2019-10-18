@@ -17,7 +17,7 @@ $(function() {
 		let name = prompt("Please enter class name", "Class");
 		let firstClass = "firstClass";
 		$("#blockArea").append("<div class= \"classblock\" id =\"" + firstClass +
-		 "\"> <form> <select id =\"dropdown\" onchange=\"dropdownClick()\" value=\"Select an option\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option> </select> </form>\"" + name +  "</div>");
+		 "\"> <form> <select id =\"dropdown\" onchange=\"dropdownClick()\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
 
 		 
 	});
@@ -52,24 +52,33 @@ function dropdownClick(){
 	console.log("Clicked dropdown")
 	let x = $("#dropdown").val();
 	let input ="";
-	if (input != null && x != "child "){
+	if (input == "Select an option...")
+	{
+		//Do NOTHING
+	}
+	if (input != null && x == "function "){
 		let input = prompt("Please enter the " + x + "to add")
-		$(".classblock").append("<p>\"" + input + "\" </p>");
-	} else if (x == "child "){
+		$(".classblock").append("<li>" + input + "()</li>");
+	} else if (input != null && x == "child "){
 		let connectParent = prompt("Please enter the name of the parent to connect to");
-	} else if (x == "delete "){
+	} else if (input != null && x == "delete "){
 		let deleteClass = prompt("Please enter the name of the class to be deleted");
+		deleteClass = "\"#" + deleteClass + "\"";
+		console.log(deleteClass);
 		$(deleteClass).remove();
+	} else if (input != null && x == "attribute "){
+		let input = prompt("Please enter the " + x + "to add")
+		$(".classblock").append("<li>" + input + "</li>");
 	}
 }
 
-function addAttribute() {
+/*function addAttribute() {
 	console.log("clicked button");
 	let input = prompt("Please enter attribute name", "Attribute");
 	if (input != null) {
 		$(".classblock").append("<p>\"" + input + "\" </p>");
 	}	
-}
+}*/
 
 function help(cmd : string) {
 	switch (cmd){

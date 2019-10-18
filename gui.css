@@ -20,12 +20,14 @@ body{
 	text-align: center;
 	position: relative;
 	display: inline-block;
+	overflow: auto;
 }
 
 #firstClass{
 	background-color: yellow;
 	position: relative;
 	text-align: center;
+	overflow: auto;
 }
 
 .child{
@@ -42,6 +44,7 @@ body{
 	margin: 0px;
 	margin-right: 5px;
 	float: left;
+	overflow: auto;
 }
 
 #button{
@@ -56,6 +59,7 @@ body{
 	height: 1200px;
 	float: left;
 	background-color: salmon;
+	overflow: auto;
 
 }
 
@@ -66,12 +70,14 @@ body{
 }
 
 #dropdown{
-	top: 150px;
-	align-content: bottom;
+	position: relative;
+	top: 225px;
 }
 
 form{
-	top: 100px;
+
 }
 
-
+li{
+	text-align: left;
+}

@@ -14,12 +14,22 @@ $(function() {
 
 	$("#button").click(function(){
 
-		let name = prompt("Please enter class name", "Class");
-		let firstClass = "firstClass";
-		$("#blockArea").append("<div class= \"classblock\" id =\"" + firstClass +
-		 "\"> <form> <select id =\"dropdown\" onchange=\"dropdownClick()\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
 
-		 
+		let name = prompt("Please enter class name", "Class");
+		let className = $('[name="' + name + '"]').attr('name');
+		console.log(className);
+
+		//if the name is found, className won't be undefined, so we know the class name already exists
+		if (className != undefined) {
+			alert("Please enter a unique class name");
+			return;
+		} 
+
+		//check if the name is null
+		if (name) {
+		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" onchange=\"dropdownClick(this)\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+		}
+
 	});
 
 	
@@ -43,42 +53,56 @@ $(function() {
 
 //called functions
 
-/** help (string)
- * is called when user gives an arguement to the help command
- * returns a string explaining specified command to the user
-**/
 
-function dropdownClick(){
+function dropdownClick(className){
+
 	console.log("Clicked dropdown")
-	let x = $("#dropdown").val();
+
+	/*className needs to be the name attribute from the HTML. if that is passed insuccessfully, 
+	we can easily access whatever div we are on based on the name. And the names will always be unique,
+	as I made sure you cannot have the same name twice when making a class block with the button*/
+
+	let x = $(".dropdown").val();
 	let input ="";
 	if (input == "Select an option...")
 	{
 		//Do NOTHING
 	}
-	if (input != null && x == "function "){
+
+	if (input != null && x == "function ") {
 		let input = prompt("Please enter the " + x + "to add")
-		$(".classblock").append("<li>" + input + "()</li>");
-	} else if (input != null && x == "child "){
+		
+		//basically, checks for the div with that name and then appends to it. It will always append to the
+		//correct div because the name is tied to each div uniquely.
+		if (input !== null) {
+			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+		}
+		
+
+	} else if (input != null && x == "child ") {
 		let connectParent = prompt("Please enter the name of the parent to connect to");
+		//actuually add the child
+
 	} else if (input != null && x == "delete "){
 		let deleteClass = prompt("Please enter the name of the class to be deleted");
 		deleteClass = "\"#" + deleteClass + "\"";
 		console.log(deleteClass);
 		$(deleteClass).remove();
+
 	} else if (input != null && x == "attribute "){
 		let input = prompt("Please enter the " + x + "to add")
-		$(".classblock").append("<li>" + input + "</li>");
+		if (input) {
+			$('[name="' + className + '"]').append("<li>" + input + "</li>");
+		}
+		
 	}
 }
 
-/*function addAttribute() {
-	console.log("clicked button");
-	let input = prompt("Please enter attribute name", "Attribute");
-	if (input != null) {
-		$(".classblock").append("<p>\"" + input + "\" </p>");
-	}	
-}*/
+
+/** help (string)
+ * is called when user gives an arguement to the help command
+ * returns a string explaining specified command to the user
+**/
 
 function help(cmd : string) {
 	switch (cmd){
@@ -265,10 +289,10 @@ function loadFile() {
 	fileReader.onload = function(fileLoadedEvent){
 		var textFromFile = fileLoadedEvent.target.result;
 		userClasses.clear();
-		let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
-		for (let i : number = 0; i < yaml.length; i++) {
+		//let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
+		/*for (let i : number = 0; i < yaml.length; i++) {
 			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
-		}
+		}*/
 	}
 	fileReader.readAsText(file, "UTF-8");
 
@@ -283,14 +307,14 @@ function selectFile() {
  */
 function saveFile() {
 	//var textContent = (<HTMLInputElement>document.getElementById("text")).value;
-	let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
+	//let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
 
 	// The octet-stream indicates a binary file.
 	// The URI encoder will encode the UTF-8 text.
-	var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
+	//var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
 	
 	// Creates a clickable link to either open or save the file that was just create.
-	document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
+	//document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
 	document.getElementById("link").click();
 }
 

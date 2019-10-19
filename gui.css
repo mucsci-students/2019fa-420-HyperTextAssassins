@@ -12,7 +12,7 @@ body{
 
 .classblock{
 	width: 150px;
-	height: 250px; 
+	height: 250px;
 	margin: 10px;
 	border-style: solid;
 	border-width: 1px;
@@ -21,14 +21,9 @@ body{
 	position: relative;
 	display: inline-block;
 	overflow: auto;
+	background-color: yellow;
 }
 
-#firstClass{
-	background-color: yellow;
-	position: relative;
-	text-align: center;
-	overflow: auto;
-}
 
 .child{
 	background-color: green;
@@ -69,7 +64,7 @@ body{
 	top: 225px;
 }
 
-#dropdown{
+.dropdown{
 	position: relative;
 	top: 225px;
 }

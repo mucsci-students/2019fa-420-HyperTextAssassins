@@ -22,14 +22,44 @@ $(function () {
     $("#button").click(function () {
         var name = prompt("Please enter class name", "Class");
         var className = $('[name="' + name + '"]').attr('name');
-        console.log(className);
         if (className != undefined) {
             alert("Please enter a unique class name");
             return;
         }
         if (name) {
-            $("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" onchange=\"dropdownClick(this)\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name + "</div>");
+            $("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" name =" + name +
+                " onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name + "</div>");
         }
+    });
+    $("#edit").click(function () {
+        var name = prompt("Please enter class name of the class you would like to edit", "Class");
+        var className = $('[name="' + name + '"]');
+        if (className.attr('name') == undefined) {
+            alert("Cannot edit nonexistent class");
+            return;
+        }
+        console.log(className.attr('name'));
+    });
+    $(document).ready(function () {
+        var $dragging = null;
+        $('#blockArea').on("mousedown", "div", function (e) {
+            console.log("clicked block");
+            $(this).attr('unselectable', 'on').addClass('draggable');
+            $('.classblock li, .classblock form').removeAttr('unselectable').removeClass('draggable');
+            var el_w = $('.draggable').outerWidth(), el_h = $('.draggable').outerHeight();
+            $('#blockArea').on("mousemove", function (e) {
+                if ($dragging) {
+                    $dragging.offset({
+                        top: e.pageY - el_h / 2,
+                        left: e.pageX - el_w / 2
+                    });
+                }
+            });
+            $dragging = $(e.target);
+        }).on("mouseup", ".draggable", function (e) {
+            $dragging = null;
+            $(this).removeAttr('unselectable').removeClass('draggable');
+        });
     });
     $("#inputFile").on("change", function () { loadFile(); });
     $("#command").on('keypress', function (e) {
@@ -40,32 +70,41 @@ $(function () {
         }
     });
 });
-function dropdownClick(option) {
-    console.log("Clicked dropdown");
-    console.log(option);
-    var x = $(".dropdown").val();
-    var input = "";
-    if (input == "Select an option...") {
+function dropDownClick(className, option) {
+    if (option == "Select an option...") {
     }
-    if (input != null && x == "function ") {
-        var input_1 = prompt("Please enter the " + x + "to add");
-        if (input_1 !== null) {
-            $('[name="' + className + '"]').append("<li>" + input_1 + "()</li>");
+    if (option === "function ") {
+        console.log(option);
+        var input = prompt("Please enter the " + option + "to add");
+        if (input) {
+            $('[name="' + className + '"]').append("<li>" + input + "()</li>");
         }
     }
-    else if (input != null && x == "child ") {
+    else if (option === "child ") {
         var connectParent = prompt("Please enter the name of the parent to connect to");
+        var className_1 = $('[name="' + connectParent + '"]').attr('name');
+        if (className_1 == undefined) {
+            alert("Class name currently does not exist");
+            return;
+        }
+        else if (className_1 == null) {
+            return;
+        }
+        else {
+        }
     }
-    else if (input != null && x == "delete ") {
-        var deleteClass = prompt("Please enter the name of the class to be deleted");
-        deleteClass = "\"#" + deleteClass + "\"";
-        console.log(deleteClass);
-        $(deleteClass).remove();
+    else if (option === "delete ") {
+        if (confirm("Are you sure you want to delete this class?")) {
+            $('[name="' + className + '"]').remove();
+        }
+        else {
+            return;
+        }
     }
-    else if (input != null && x == "attribute ") {
-        var input_2 = prompt("Please enter the " + x + "to add");
-        if (input_2) {
-            $('[name="' + className + '"]').append("<li>" + input_2 + "</li>");
+    else if (option === "attribute ") {
+        var input = prompt("Please enter the " + option + "to add");
+        if (input) {
+            $('[name="' + className + '"]').append("<li>" + input + "</li>");
         }
     }
 }

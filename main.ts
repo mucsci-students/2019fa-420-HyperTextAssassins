@@ -1,5 +1,6 @@
 /// <reference path="classblock.ts" />
 
+
 let userClasses = new Map();
 
 $(function() {
@@ -12,14 +13,15 @@ $(function() {
 
 	//do on event
 
+	//Button left hand side
 	$("#button").click(function(){
 
-
+		//get name from user and then check if the div exists
 		let name = prompt("Please enter class name", "Class");
 		let className = $('[name="' + name + '"]').attr('name');
-		console.log(className);
 
-		//if the name is found, className won't be undefined, so we know the class name already exists
+		//if the name is found, className won't be undefined, so we know the 
+		//class name already exists
 		if (className != undefined) {
 			alert("Please enter a unique class name");
 			return;
@@ -27,10 +29,48 @@ $(function() {
 
 		//check if the name is null
 		if (name) {
-		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" onchange=\"dropdownClick(this)\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" name =" + name + 
+			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
 		}
 
 	});
+
+	//controls editing the class blocks
+	$("#edit").click(function() {
+		let name = prompt("Please enter class name of the class you would like to edit", "Class");
+		let className = $('[name="' + name + '"]');
+
+		if(className.attr('name') == undefined) {
+			alert("Cannot edit nonexistent class");
+			return;
+		}
+
+		console.log(className.attr('name'));
+	});
+
+	//dragging
+	$(document).ready(function() {
+    var $dragging = null;
+    $('#blockArea').on("mousedown", "div", function(e) {
+    	console.log("clicked block");
+        $(this).attr('unselectable', 'on').addClass('draggable');
+        $('.classblock li, .classblock form').removeAttr('unselectable').removeClass('draggable');
+        var el_w = $('.draggable').outerWidth(),
+            el_h = $('.draggable').outerHeight();
+        $('#blockArea').on("mousemove", function(e) {
+            if ($dragging) {
+                $dragging.offset({
+                    top: e.pageY - el_h / 2,
+                    left: e.pageX - el_w / 2
+                });
+            }
+        });
+        $dragging = $(e.target);
+    }).on("mouseup", ".draggable", function(e) {
+        $dragging = null;
+        $(this).removeAttr('unselectable').removeClass('draggable');
+    });
+});​
 
 	
 	
@@ -54,43 +94,51 @@ $(function() {
 //called functions
 
 
-function dropdownClick(className){
+function dropDownClick(className, option){
 
-	console.log("Clicked dropdown")
-
-	/*className needs to be the name attribute from the HTML. if that is passed insuccessfully, 
-	we can easily access whatever div we are on based on the name. And the names will always be unique,
-	as I made sure you cannot have the same name twice when making a class block with the button*/
-
-	let x = $(".dropdown").val();
-	let input ="";
-	if (input == "Select an option...")
+	if (option == "Select an option...")
 	{
 		//Do NOTHING
 	}
 
-	if (input != null && x == "function ") {
-		let input = prompt("Please enter the " + x + "to add")
-		
+	if (option === "function ") {
+		console.log(option);
+		let input = prompt("Please enter the " + option + "to add")
+
 		//basically, checks for the div with that name and then appends to it. It will always append to the
 		//correct div because the name is tied to each div uniquely.
-		if (input !== null) {
+		if (input) {
 			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
 		}
 		
-
-	} else if (input != null && x == "child ") {
+	} else if (option === "child ") {
+		//same idea as adding a class block to see if it already exists
 		let connectParent = prompt("Please enter the name of the parent to connect to");
-		//actuually add the child
+		let className = $('[name="' + connectParent + '"]').attr('name');
+		
+		//prevents connecting to an undefined/null classblock
+		//Connects parents and children
+		if (className == undefined) {
+			alert("Class name currently does not exist");
+			return;
+		} else if (className == null) {
+			return;
+		} else {
+			//TODO
+			//Run code to connect arrows, relationship
+		}
 
-	} else if (input != null && x == "delete "){
-		let deleteClass = prompt("Please enter the name of the class to be deleted");
-		deleteClass = "\"#" + deleteClass + "\"";
-		console.log(deleteClass);
-		$(deleteClass).remove();
-
-	} else if (input != null && x == "attribute "){
-		let input = prompt("Please enter the " + x + "to add")
+	} else if (option === "delete ") {
+		//find div based on name and remove
+		if(confirm("Are you sure you want to delete this class?")){
+			$('[name="' + className + '"]').remove();
+		}
+		else {
+			return;
+		}
+		
+	} else if (option === "attribute ") {
+		let input = prompt("Please enter the " + option + "to add")
 		if (input) {
 			$('[name="' + className + '"]').append("<li>" + input + "</li>");
 		}

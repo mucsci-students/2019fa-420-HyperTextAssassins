@@ -39,52 +39,58 @@ function help(cmd : string) {
 		case "clear":
 			return ">clear\n"
 			+ " Clears terminal log";
-		break;
 
 		case "help":
 			return ">help <command>\n"
 			+ " Is helpful";
-		break;
 
 		case "create":
 			return ">create <classname>\n"
 			 + " Creates a block";
-		break;
+
+		case "addvar":
+			return ">addvar <targetclass> <var>\n"
+			 + " Adds a variable to target class";
+
+		case "delvar":
+			return ">delvar <targetclass> <var>\n"
+			 + " Deletes a variable from target class";
+
+		case "addfun":
+			return ">addvar <targetclass> <var>\n"
+			+ " Adds a function to target class";
+
+		case "delfun":
+			return ">create <classname>\n"
+			+ " Deletes a function from target class";
 
 		case "delete":
 			return ">delete <classname>\n"
 			 + " Deletes target class";
-		break;
 
 		case "print":
 			return ">print <targetclass>\n"
 			+ " Prints information on target class";
-		break;
 
 		case "printall":
 			return ">printall\n"
 			+ " Prints all current classes and their information";
-		break;
 
 		case "rename":
 			return ">rename <targetclass> <newname>\n"
 			+ " Changes a classes name";
-		break;
 
 		case "save":
 			return ">save\n"
 			 + " Prompts user to save diagram as .yml file";
-		break;
 
 		case "load":
 			return ">load\n"
 			 + " Loads diagram from loaded .yml file";
-		break;
 
 		case "loadfile":
 			return ">loadfile\n"
 			 + " Reveals a button that prompts for a file";
-		break;
 
 		default:
 			return cmd + " is not a command"
@@ -116,6 +122,10 @@ function doCommand(command : string) {
 				apdLog(("list of commands\n"
 						+ ">clear\n"
 						+ ">create\n"
+						+ ">addvar\n"
+						+ ">delvar\n"
+						+ ">addfun\n"
+						+ ">delfun\n"
 						+ ">delete\n"
 						+ ">rename\n"
 						+ ">print\n"
@@ -142,6 +152,54 @@ function doCommand(command : string) {
 			if (userClasses.has(args[1])) {
 				userClasses.delete(args[1]);
 				apdLog(args[1] + " deleted", log);
+			} else {
+				apdLog(args[1] + " class does not exist", log);
+			}
+		break;
+
+		case "addvar":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).setVar(args[2])) {
+					apdLog("Var " + args[2] + " added to " + args[1], log);
+				} else {
+					apdLog("Var " + args[2] + " already exists in " + args[1], log);
+				}
+			} else {
+				apdLog(args[1] + " class does not exist", log);
+			}
+		break;
+
+		case "delvar":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).removeVar(args[2])) {
+					apdLog("Var " + args[2] + " deleted from " + args[1], log);
+				} else {
+					apdLog("Var " + args[2] + " does not exist in " + args[1], log);
+				}
+			} else {
+				apdLog(args[1] + " class does not exist", log);
+			}
+		break;
+
+		case "addfun":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).setFun(args[2])) {
+					apdLog("Fun " + args[2] + " added to " + args[1], log);
+				} else {
+					apdLog("Fun " + args[2] + " already exists in " + args[1], log);
+				}
+			} else {
+				apdLog(args[1] + " class does not exist", log);
+			}
+		break;
+
+		case "delfun":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).removeFun(args[2])) {
+					apdLog("Fun " + args[2] + " deleted from " + args[1], log);
+				} else {
+					apdLog("Fun " + args[2] + " does not exist in " + args[1], log);
+				}
 			} else {
 				apdLog(args[1] + " class does not exist", log);
 			}
@@ -258,7 +316,7 @@ function doCommand(command : string) {
 			apdLog(args[0] + " is not a command", log);
 		break;
 	}
-	log.scrollTop(log[0].scrollHeight);	
+	log.scrollTop(log[0].scrollHeight);
 }
 
 /**

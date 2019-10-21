@@ -85,6 +85,36 @@ function help(cmd : string) {
 			return ">loadfile\n"
 			 + " Reveals a button that prompts for a file";
 		break;
+		
+		case "removeparent":
+			return ">removeparent\n"
+			 + " Removes the parent of a classblock." 
+		break;
+			
+		case "addparent":
+			return ">addparent\n"
+			 + " Adds a parent to a classblock."
+		break;
+			
+		case "getparent":
+			return ">getparent\n"
+			 + " Returns the parent of a classblock."
+		break;
+			
+		case "deletechild":
+			return ">deletechild\n"
+			 + " Removes a specific child from a classblock."
+		break;
+			
+		case "getchildren":
+			return ">getchildren\n"
+			 + " Returns all of the children for a classblock."
+		break;
+			
+		case "addchild":
+			return ">addchild\n"
+			 + " Adds a child to a classblock."
+		break;
 
 		default:
 			return cmd + " is not a command"
@@ -282,7 +312,7 @@ function getChildren(targetClass : string)
 function addChild(targetClass : string, childClass : string)
 {
 	userClasses.get(targetClass).addChild(childClass);
-	userClasses.get(childClass).addParent(targetClass);
+	userClasses.get(childClass).setParent(targetClass);
 	return ("added " + childClass + " as a child to " + targetClass + ".");
 }
 
@@ -293,8 +323,11 @@ function addChild(targetClass : string, childClass : string)
  */
 function deleteChild(targetClass : string, childClass : string)
 {
-	userClasses.get(targetClass).removeChild(childClass);
-	return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+	if((userClasses.get(targetClass).getChildren()).includes(childClass)) {
+		userClasses.get(targetClass).removeChild(childClass);
+		return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+	}
+	return (childClass + " is not a child of " + targetClass + ".");
 }
 
 /**

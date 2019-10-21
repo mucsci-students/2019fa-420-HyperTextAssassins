@@ -1,7 +1,7 @@
 class classBlock {
 	private name : string;
-	private vars : Set<string> = new Set();
-	private funs : Set<string> = new Set();
+	private vars : string[] = new Array();
+	private funs : string[] = new Array();
 	private parent: string = null;
 	private children : string[] = new Array();
 
@@ -14,13 +14,13 @@ class classBlock {
 	**/
 	print() {
 		let classOut : string = "Class : " + this.name;
-		if (this.vars.size > 0) {
+		if (this.vars.length > 0) {
 			classOut += " Variables :";
 			this.vars.forEach(function(i) {
 				classOut += " " + i; 
 			});
 		}
-		if (this.funs.size > 0) {
+		if (this.funs.length > 0) {
 			classOut += " Functions :";
 			this.funs.forEach(function(i) {
 				classOut += " " + i; 
@@ -50,9 +50,9 @@ class classBlock {
 	 * Creates a new variable in a classBlock
 	**/
 	setVar(vari : string) {
-		if (this.vars.has(vari))
+		if (this.isVar(vari))
 			return false;
-		this.vars.add(vari);
+		this.vars.push(vari);
 		return true;
 	}
 
@@ -60,23 +60,27 @@ class classBlock {
 	 * checks if a variable exists inside a classBlock
 	**/
 	isVar(vari : string) {
-		return this.vars.has(vari);
+		return (this.vars.indexOf(vari) != -1);
 	}
 
 	/** removeVar (string) returns string
 	 * Removes a variable from a classBlock
 	**/
 	removeVar(vari : string) {
-		return this.vars.delete(vari);
+		let index = this.vars.indexOf(vari);
+		if (index == -1)
+			return false;
+		this.vars.splice(index, 1);
+		return true;
 	}
 
 	/** setFun (string) returns bool
 	 * Creates a new function in a classBlock
 	**/
-	setFun(fun : string) {
-		if (this.funs.has(fun))
+	setFun(func : string) {
+		if (this.isFun(func))
 			return false;
-		this.funs.add(fun);
+		this.funs.push(func);
 		return true;
 	}
 
@@ -84,14 +88,18 @@ class classBlock {
 	 * checks if a function exists inside a classBlock
 	**/
 	isFun(func : string) {
-		return this.funs.has(func);
+		return (this.funs.indexOf(func) != -1);
 	}
 
 	/** removeFun (string) returns string
 	 * Removes a function from a classBlock
 	**/
-	removeFun(fun : string) {
-		return this.funs.delete(fun);
+	removeFun(func : string) {
+		let index = this.funs.indexOf(func);
+		if (index == -1)
+			return false;
+		this.funs.splice(index, 1);
+		return true;
 	}
 
 	/**

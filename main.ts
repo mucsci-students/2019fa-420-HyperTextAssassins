@@ -1,14 +1,15 @@
 /// <reference path="classBlock.ts" />
 
-let userClasses = new Map();
+let userClasses = new Map<string, classBlock>();
 
 $(function() {
 	//vars
+	let log : JQuery = $("#log");
+	let command : JQuery = $("#command");
 
 	//do on page load
-
-	$("#log").val("UML Terminal\n>help");
-	$("#command").focus();
+	log.val("UML Terminal\n>help");
+	command.focus();
 
 	//do on event
 
@@ -17,13 +18,20 @@ $(function() {
 	**/
 	$("#inputFile").on("change", function () {loadFile();});
 
-	//runs every time key is pressed when #command is focus
-	$("#command").on('keypress', function(e) {
+	//runs every time a key is pressed when #command is in focus
+	command.on('keypress', function(e) {
 		//checks if enter key is pressed
 		if(e.which === 13) {
-			let command : JQuery = $("#command");
-			doCommand(<string>command.val());
-			command.val("");
+			if (command.val() == "clear")
+				log.val("");
+			else if (command.val() == "")
+				apdLog("", log);
+			else {
+				apdLog(">" + command.val(), log);
+				apdLog (<string>doCommand(<string>command.val())[0], log);
+				log.scrollTop(log[0].scrollHeight);
+				command.val("");
+			}
 		}
 	});
 });
@@ -97,29 +105,23 @@ function help(cmd : string) {
 	}
 }
 
-/** doCommand (string)
+/** doCommand (string) returns tuple of [string, bool]
  * checks user input for command and executes it if it exists
  * otherwise only returns users input
 **/
 function doCommand(command : string) {
-	let log : JQuery = $("#log");
-		
-	apdLog(">" + command, log);
 
 	//reg expression for split to allow any number of spaces
 	let args : Array<string> = (command.split(/\s{1,}/));
 	args[0] = args[0].toLocaleLowerCase();
 
 	switch (args[0]) {
-		case "clear":
-			log.val("")	
-		break;
 
 		case "help":
 			if (args.length > 1) {
-				apdLog(help(args[1]), log);
+				return [help(args[1]), true];
 			} else {
-				apdLog(("list of commands\n"
+				return["list of commands\n"
 						+ ">clear\n"
 						+ ">create\n"
 						+ ">addvar\n"
@@ -132,191 +134,164 @@ function doCommand(command : string) {
 						+ ">printall\n"
 						+ ">save\n"
 						+ ">load\n"
-						+ "type >help <command> for instructions on that command")
-				, log);
+						+ "type >help <command> for instructions on that command", true];
 			}
-		break;
 
 		case "create":
 			if (userClasses.has(args[1])) {
-				apdLog("Name already in use. Please enter unique name.", log);
+				return ["Name already in use. Please enter unique name.", false];
 			} else if (args.length < 2 || args[1] == "") {
-				apdLog("Please enter a name after create, type <help> <create> for more info", log);
+				return ["Please enter a name after create, type <help> <create> for more info", false];
 			} else {
 				userClasses.set(args[1], new classBlock(args[1]));
-				apdLog(userClasses.get(args[1]).getName() + " created", log);
+				return [userClasses.get(args[1]).getName() + " created", true];
 			}
-		break;
 
 		case "delete":
 			if (userClasses.has(args[1])) {
 				userClasses.delete(args[1]);
-				apdLog(args[1] + " deleted", log);
+				return [args[1] + " deleted", true];
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "addvar":
 			if (userClasses.has(args[1])) {
 				if (userClasses.get(args[1]).setVar(args[2])) {
-					apdLog("Var " + args[2] + " added to " + args[1], log);
+					return ["Var " + args[2] + " added to " + args[1], true];
 				} else {
-					apdLog("Var " + args[2] + " already exists in " + args[1], log);
+					return ["Var " + args[2] + " already exists in " + args[1], false];
 				}
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "delvar":
 			if (userClasses.has(args[1])) {
 				if (userClasses.get(args[1]).removeVar(args[2])) {
-					apdLog("Var " + args[2] + " deleted from " + args[1], log);
+					return ["Var " + args[2] + " deleted from " + args[1], true];
 				} else {
-					apdLog("Var " + args[2] + " does not exist in " + args[1], log);
+					return ["Var " + args[2] + " does not exist in " + args[1], false];
 				}
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "addfun":
 			if (userClasses.has(args[1])) {
 				if (userClasses.get(args[1]).setFun(args[2])) {
-					apdLog("Fun " + args[2] + " added to " + args[1], log);
+					return ["Fun " + args[2] + " added to " + args[1], true];
 				} else {
-					apdLog("Fun " + args[2] + " already exists in " + args[1], log);
+					return ["Fun " + args[2] + " already exists in " + args[1], false];
 				}
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "delfun":
 			if (userClasses.has(args[1])) {
 				if (userClasses.get(args[1]).removeFun(args[2])) {
-					apdLog("Fun " + args[2] + " deleted from " + args[1], log);
+					return ["Fun " + args[2] + " deleted from " + args[1], true];
 				} else {
-					apdLog("Fun " + args[2] + " does not exist in " + args[1], log);
+					return ["Fun " + args[2] + " does not exist in " + args[1], false];
 				}
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "print":
 			if (userClasses.has(args[1])) {
-				apdLog(userClasses.get(args[1]).print(), log);
+				return [userClasses.get(args[1]).print(), true];
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "printall":
+			let newLines : number = userClasses.size;
+			let blocks : string = "";
 			userClasses.forEach((block : classBlock) => {
-				apdLog(block.print(), log);
+				blocks += block.print();
+				if (newLines > 1) {
+					blocks += "\n";
+					--newLines;
+				}
 			});
-		break;
+			return [blocks, true];
 
 		case "rename":
 			if (args.length != 3) {
-				apdLog("Please use this format: >rename <targetclass> <newname>", log);
-				break;
+				return ["Please use this format: >rename <targetclass> <newname>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			}
-			apdLog(rename(args[1], args[2]), log);
-		break;
+			return [rename(args[1], args[2]), true];
+
 
 		case "save":
 			saveFile();
-		break;
+			return ["Saving", true];
 
 		case "load":
 			selectFile();
-		break;
+			return ["Loading", true]
 
 		case "addparent":
 			if (args.length != 3) {
-				apdLog("format: >addparent <targetclass> <parentclass>", log);
-				break;
+				return ["format: >addparent <targetclass> <parentclass>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
-				apdLog(args[2] + " does not exist", log);
-				break;
+				return [args[2] + " does not exist", false];
 			}
-			apdLog(addParent(args[1], args[2]), log);
-		break;
+			return [addParent(args[1], args[2]), true];
 		
-		case "getparent":
+		case "getparent": 
 			if (args.length != 2) {
-				apdLog("format: >getparent <targetclass>", log);
-				break;
+				return ["format: >getparent <targetclass>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			}
-			apdLog(getParent(args[1]), log);
-		break;
+			return [getParent(args[1]), true];
 
 		case "removeparent":
 			if (args.length != 2) {
-				apdLog("format: >removeparent <targetclass>", log);
-				break;
+				return ["format: >removeparent <targetclass>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			}
-			apdLog(removeParent(args[1]), log);
-		break;
+			return [removeParent(args[1]), true];
 
 		case "addchild":
 			if (args.length < 3) {
-				apdLog("format: >addchild <targetclass> <childclass>", log);
+				return ["format: >addchild <targetclass> <childclass>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
-				apdLog(args[2] + " does not exist", log);
-				break;
+				return [args[2] + " does not exist", false];
 			}
-			apdLog(addChild(args[1], args[2]), log)
-		break;
+			return [addChild(args[1], args[2]), true];
 
 		case "getchildren":
 			if (args.length != 2) {
-				apdLog("format: >getchildren <targetclass>", log);
-				break;
+				return ["format: >getchildren <targetclass>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			}
-			apdLog(getChildren(args[1]), log)
-		break;
+			return [getChildren(args[1]), true];
 
 		case "deletechild":
 			if (args.length != 3) {
-				apdLog("format: >getchildren <targetclass>", log);
-				break;
+				return ["format: >getchildren <targetclass>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
-				apdLog(args[2] + " does not exist", log);
-				break;
+				return [args[2] + " does not exist", false];
 			}
-			apdLog(deleteChild(args[1], args[2]), log)
-		break;
+			return [deleteChild(args[1], args[2]), true];
 
 		default:
-			apdLog(args[0] + " is not a command", log);
-		break;
+			return [args[0] + " is not a command", false];
 	}
-	log.scrollTop(log[0].scrollHeight);
 }
 
 /**
@@ -340,7 +315,7 @@ function getChildren(targetClass : string)
 function addChild(targetClass : string, childClass : string)
 {
 	userClasses.get(targetClass).addChild(childClass);
-	userClasses.get(childClass).addParent(targetClass);
+	userClasses.get(childClass).setParent(targetClass);
 	return ("added " + childClass + " as a child to " + targetClass + ".");
 }
 
@@ -423,6 +398,16 @@ function loadFile() {
 		let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
 		for (let i : number = 0; i < yaml.length; i++) {
 			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
+			yaml[i][1]["vars"].forEach(function(j) {
+				userClasses.get(yaml[i][0]).setVar(j);
+			});
+			yaml[i][1]["funs"].forEach(function(j) {
+				userClasses.get(yaml[i][0]).setFun(j);
+			});
+			userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);
+			yaml[i][1]["children"].forEach(function(j) {
+				userClasses.get(yaml[i][0]).addChild(j);
+			});
 		}
 	}
 	fileReader.readAsText(file, "UTF-8");

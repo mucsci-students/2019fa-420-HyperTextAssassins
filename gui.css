@@ -42,15 +42,39 @@ body{
 	overflow: auto;
 }
 
-#button{
+#add{
 	height: 50px;
 	width: 90%;
 	margin: 5%;
+	margin-bottom: 25px;
+	padding: 50px 50px;
+	cursor: pointer;
 
 }
 
 #edit {
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
 	
+}
+
+#save{
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
+#load{
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
 }
 
 #blockArea{
@@ -64,13 +88,12 @@ body{
 
 .dropdown{
 	position: relative;
-	top: 225px;
+	top: 225px !important;
+	left: 0px !important;
 }
 
-form{
-
-}
 
 li{
 	text-align: left;
+	pointer-events: none;
 }

@@ -14,9 +14,9 @@ $(function() {
 	//do on event
 
 	//Button left hand side
-	$("#button").click(function(){
+	$("#add").click(function(){
 
-		//get name from user and then check if the div exists
+		//get name from user and then check if the div exists	
 		let name = prompt("Please enter class name", "Class");
 		let className = $('[name="' + name + '"]').attr('name');
 
@@ -29,7 +29,7 @@ $(function() {
 
 		//check if the name is null
 		if (name) {
-		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" name =" + name + 
+		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
 			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
 		}
 
@@ -37,26 +37,60 @@ $(function() {
 
 	//controls editing the class blocks
 	$("#edit").click(function() {
-		let name = prompt("Please enter class name of the class you would like to edit", "Class");
+		let name = prompt("Please enter the name of the class you would like to edit", "Class");
 		let className = $('[name="' + name + '"]');
 
-		if(className.attr('name') == undefined) {
+		if(name == null) {
+			return;
+		} else if(className.attr('name') == undefined) {
 			alert("Cannot edit nonexistent class");
 			return;
 		}
 
-		console.log(className.attr('name'));
+		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
+		//handles deleting attributes
+		if(option.toLowerCase().trim() == "delete"){
+			let item = prompt("What is the name of the attribute/function you'd like to delete? ");
+			item = item.toLowerCase().trim();
+
+			$('[name="' + name + '"]').children().each(function() {
+				console.log("hi");
+				if($(this).text() === item) {
+					console.log("Inside if")
+					$(this).remove();
+				}
+			});
+			
+		//handles editing attributes/functions
+		} else if (option.toLowerCase().trim() == "edit"){
+			let itemToEdit = prompt("What is the name of the attribute/function you'd like to edit? ");
+			let newName = prompt("What would you like to rename it too? ");
+			itemToEdit = itemToEdit.toLowerCase().trim();
+			
+			$('[name="' + name + '"]').children().each(function() {
+				if($(this).text() === itemToEdit) {
+					$(this).text(newName);
+				}
+			});
+
+		}
 	});
+
+	$("#save").click(function() {
+		
+	});
+
+
 
 	//dragging
 	$(document).ready(function() {
     var $dragging = null;
     $('#blockArea').on("mousedown", "div", function(e) {
-    	console.log("clicked block");
-        $(this).attr('unselectable', 'on').addClass('draggable');
-        $('.classblock li, .classblock form').removeAttr('unselectable').removeClass('draggable');
+		console.log("clicked block");
+		$(this).attr('unselectable', 'on').addClass('draggable');
         var el_w = $('.draggable').outerWidth(),
-            el_h = $('.draggable').outerHeight();
+			el_h = $('.draggable').outerHeight();
+			
         $('#blockArea').on("mousemove", function(e) {
             if ($dragging) {
                 $dragging.offset({
@@ -67,10 +101,13 @@ $(function() {
         });
         $dragging = $(e.target);
     }).on("mouseup", ".draggable", function(e) {
-        $dragging = null;
+		$dragging = null;
         $(this).removeAttr('unselectable').removeClass('draggable');
-    });
-});​
+	});
+	
+	
+});​ 
+
 
 	
 	

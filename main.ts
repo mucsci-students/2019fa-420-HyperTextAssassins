@@ -1,5 +1,6 @@
 /// <reference path="classblock.ts" />
 
+
 let userClasses = new Map();
 
 $(function() {
@@ -11,6 +12,105 @@ $(function() {
 	$("#command").focus();
 
 	//do on event
+
+	//Button left hand side
+	$("#add").click(function(){
+
+		//get name from user and then check if the div exists	
+		let name = prompt("Please enter class name", "Class");
+		let className = $('[name="' + name + '"]').attr('name');
+
+		//if the name is found, className won't be undefined, so we know the 
+		//class name already exists
+		if (className != undefined) {
+			alert("Please enter a unique class name");
+			return;
+		} 
+
+		//check if the name is null
+		if (name) {
+		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
+			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+		}
+
+	});
+
+	//controls editing the class blocks
+	$("#edit").click(function() {
+		let name = prompt("Please enter the name of the class you would like to edit", "Class");
+		let className = $('[name="' + name + '"]');
+
+		if(name == null) {
+			return;
+		} else if(className.attr('name') == undefined) {
+			alert("Cannot edit nonexistent class");
+			return;
+		}
+
+		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
+		//handles deleting attributes
+		if(option.toLowerCase().trim() == "delete"){
+			let item = prompt("What is the name of the attribute/function you'd like to delete? ");
+			item = item.toLowerCase().trim();
+
+			$('[name="' + name + '"]').children().each(function() {
+				console.log("hi");
+				if($(this).text() === item) {
+					console.log("Inside if")
+					$(this).remove();
+				}
+			});
+			
+		//handles editing attributes/functions
+		} else if (option.toLowerCase().trim() == "edit"){
+			let itemToEdit = prompt("What is the name of the attribute/function you'd like to edit? ");
+			let newName = prompt("What would you like to rename it too? ");
+			itemToEdit = itemToEdit.toLowerCase().trim();
+			
+			$('[name="' + name + '"]').children().each(function() {
+				if($(this).text() === itemToEdit) {
+					$(this).text(newName);
+				}
+			});
+
+		}
+	});
+
+	$("#save").click(function() {
+		
+	});
+
+
+
+	//dragging
+	$(document).ready(function() {
+    var $dragging = null;
+    $('#blockArea').on("mousedown", "div", function(e) {
+		console.log("clicked block");
+		$(this).attr('unselectable', 'on').addClass('draggable');
+        var el_w = $('.draggable').outerWidth(),
+			el_h = $('.draggable').outerHeight();
+			
+        $('#blockArea').on("mousemove", function(e) {
+            if ($dragging) {
+                $dragging.offset({
+                    top: e.pageY - el_h / 2,
+                    left: e.pageX - el_w / 2
+                });
+            }
+        });
+        $dragging = $(e.target);
+    }).on("mouseup", ".draggable", function(e) {
+		$dragging = null;
+        $(this).removeAttr('unselectable').removeClass('draggable');
+	});
+	
+	
+});​ 
+
+
+	
+	
 
 	/** Listens to inputFile and loads a file selected from windows prompt
 	 * Basically a way to seperate selecting a file from actually loading it
@@ -30,10 +130,65 @@ $(function() {
 
 //called functions
 
+
+function dropDownClick(className, option){
+
+	if (option == "Select an option...")
+	{
+		//Do NOTHING
+	}
+
+	if (option === "function ") {
+		console.log(option);
+		let input = prompt("Please enter the " + option + "to add")
+
+		//basically, checks for the div with that name and then appends to it. It will always append to the
+		//correct div because the name is tied to each div uniquely.
+		if (input) {
+			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+		}
+		
+	} else if (option === "child ") {
+		//same idea as adding a class block to see if it already exists
+		let connectParent = prompt("Please enter the name of the parent to connect to");
+		let className = $('[name="' + connectParent + '"]').attr('name');
+		
+		//prevents connecting to an undefined/null classblock
+		//Connects parents and children
+		if (className == undefined) {
+			alert("Class name currently does not exist");
+			return;
+		} else if (className == null) {
+			return;
+		} else {
+			//TODO
+			//Run code to connect arrows, relationship
+		}
+
+	} else if (option === "delete ") {
+		//find div based on name and remove
+		if(confirm("Are you sure you want to delete this class?")){
+			$('[name="' + className + '"]').remove();
+		}
+		else {
+			return;
+		}
+		
+	} else if (option === "attribute ") {
+		let input = prompt("Please enter the " + option + "to add")
+		if (input) {
+			$('[name="' + className + '"]').append("<li>" + input + "</li>");
+		}
+		
+	}
+}
+
+
 /** help (string)
  * is called when user gives an arguement to the help command
  * returns a string explaining specified command to the user
 **/
+
 function help(cmd : string) {
 	switch (cmd){
 		case "clear":
@@ -219,10 +374,10 @@ function loadFile() {
 	fileReader.onload = function(fileLoadedEvent){
 		var textFromFile = fileLoadedEvent.target.result;
 		userClasses.clear();
-		let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
-		for (let i : number = 0; i < yaml.length; i++) {
+		//let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
+		/*for (let i : number = 0; i < yaml.length; i++) {
 			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
-		}
+		}*/
 	}
 	fileReader.readAsText(file, "UTF-8");
 
@@ -237,14 +392,14 @@ function selectFile() {
  */
 function saveFile() {
 	//var textContent = (<HTMLInputElement>document.getElementById("text")).value;
-	let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
+	//let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
 
 	// The octet-stream indicates a binary file.
 	// The URI encoder will encode the UTF-8 text.
-	var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
+	//var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
 	
 	// Creates a clickable link to either open or save the file that was just create.
-	document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
+	//document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
 	document.getElementById("link").click();
 }
 

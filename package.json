@@ -1,0 +1,22 @@
+{
+    "name": "umlproject",
+    "version": "1.0.0",
+    "description": "",
+    "main": "main.ts",
+    "scripts": {
+        "test": "tsc && karma start --single-run --browsers FirefoxHeadless karma.conf.js"
+    },
+    "author": "",
+    "license": "",
+    "devDependencies": {
+        "@types/jquery": "^3.3.31",
+        "@types/js-yaml": "^3.12.1",
+        "chai": "^4.2.0",
+        "karma": "^4.4.1",
+        "karma-chai": "^0.1.0",
+        "karma-firefox-launcher": "^1.2.0",
+        "karma-mocha": "^1.3.0",
+        "mocha": "^6.2.2",
+        "typescript": "^3.6.4"
+    }
+}

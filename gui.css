@@ -21,7 +21,7 @@ body{
 	position: relative;
 	display: inline-block;
 	overflow: auto;
-	background-color: yellow;
+	background-color: silver;
 }
 
 
@@ -35,7 +35,7 @@ body{
 	border-right: 2px;	
 	height: 100%;
 	width: 50px;
-	background-color: turquoise;
+	background-color: silver;
 	margin: 0px;
 	margin-right: 5px;
 	float: left;
@@ -81,7 +81,7 @@ body{
 	width: 1100px;
 	height: 1200px;
 	float: left;
-	background-color: salmon;
+	background-color: gray;
 	overflow: auto;
 
 }
@@ -96,4 +96,8 @@ body{
 li{
 	text-align: left;
 	pointer-events: none;
+}
+
+.hidden {
+	display: none;
 }

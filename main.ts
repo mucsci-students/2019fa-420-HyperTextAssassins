@@ -264,6 +264,37 @@ function help(cmd : string) {
 		case "loadfile":
 			return ">loadfile\n"
 			 + " Reveals a button that prompts for a file";
+		break;
+		
+		case "removeparent":
+			return ">removeparent\n"
+			 + " Removes the parent of a classblock." 
+		break;
+			
+		case "addparent":
+			return ">addparent\n"
+			 + " Adds a parent to a classblock."
+		break;
+			
+		case "getparent":
+			return ">getparent\n"
+			 + " Returns the parent of a classblock."
+		break;
+			
+		case "deletechild":
+			return ">deletechild\n"
+			 + " Removes a specific child from a classblock."
+		break;
+			
+		case "getchildren":
+			return ">getchildren\n"
+			 + " Returns all of the children for a classblock."
+		break;
+			
+		case "addchild":
+			return ">addchild\n"
+			 + " Adds a child to a classblock."
+		break;
 
 		default:
 			return cmd + " is not a command"
@@ -491,8 +522,11 @@ function addChild(targetClass : string, childClass : string)
  */
 function deleteChild(targetClass : string, childClass : string)
 {
-	userClasses.get(targetClass).removeChild(childClass);
-	return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+	if((userClasses.get(targetClass).getChildren()).indexOf(childClass) > -1) {
+		userClasses.get(targetClass).removeChild(childClass);
+		return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+	}
+	return (childClass + " is not a child of " + targetClass + ".");
 }
 
 /**

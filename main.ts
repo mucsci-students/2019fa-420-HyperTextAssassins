@@ -1,89 +1,299 @@
-/// <reference path="classblock.ts" />
+/// <reference path="classBlock.ts" />
 
-let userClasses = new Map();
+let userClasses = new Map<string, classBlock>();
 
 $(function() {
 	//vars
+	let log : JQuery = $("#log");
+	let command : JQuery = $("#command");
 
 	//do on page load
-
-	$("#log").val("UML Terminal\n>help");
-	$("#command").focus();
+	log.val("UML Terminal\n>help");
+	command.focus();
 
 	//do on event
+
+	//Button left hand side
+	$("#add").click(function(){
+
+		//get name from user and then check if the div exists
+		let name = prompt("Please enter class name", "Class");
+		let className = $('[name="' + name + '"]').attr('name');
+
+		//if the name is found, className won't be undefined, so we know the
+		//class name already exists
+		if (className != undefined) {
+			alert("Please enter a unique class name");
+			return;
+		} 
+
+		//check if the name is null
+
+		if (name && doCommand("create " + name)[1]) {
+		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
+			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+		
+		}
+
+
+	});
+
+	//controls editing the class blocks
+	$("#edit").click(function() {
+		let name = prompt("Please enter the name of the class you would like to edit", "Class");
+		let className = $('[name="' + name + '"]');
+
+		if(name == null) {
+			return;
+		} else if(className.attr('name') == undefined) {
+			alert("Cannot edit nonexistent class");
+			return;
+		}
+
+		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
+		//handles deleting attributes
+		if(option.toLowerCase().trim() == "delete"){
+			let item = prompt("What is the name of the attribute/function you'd like to delete? ");
+			item = item.toLowerCase().trim();
+
+			$('[name="' + name + '"]').children().each(function() {
+				if($(this).text() === item && doCommand("delvar " + name + " " + item)[1]) {
+					$(this).remove();
+				} else if($(this).text().slice(-2) === "()" && doCommand("delfun " + name + " " + item)[1]) {
+					$(this).remove();
+				}
+				
+			});
+		
+			
+		//handles editing attributes/functions
+		} else if (option.toLowerCase().trim() == "edit"){
+			let itemToEdit = prompt("What is the name of the attribute/function you'd like to edit? ");
+			let newName = prompt("What would you like to rename it too? ");
+			itemToEdit = itemToEdit.toLowerCase().trim();
+			
+			$('[name="' + name + '"]').children().each(function() {
+				if($(this).text() === itemToEdit) {
+					$(this).text(newName);
+				}
+			});
+
+		}
+	});
+
+	$("#save").click(function() {
+		doCommand("save");
+	});
+
+	$("#load").click(function() {
+		doCommand("load");
+		
+	});
+
+
+
+	//dragging
+	$(document).ready(function() {
+    var $dragging = null;
+    $('#blockArea').on("mousedown", "div", function(e) {
+		$(this).attr('unselectable', 'on').addClass('draggable');
+        var el_w = $('.draggable').outerWidth(),
+			el_h = $('.draggable').outerHeight();
+			
+        $('#blockArea').on("mousemove", function(e) {
+            if ($dragging) {
+                $dragging.offset({
+                    top: e.pageY - el_h / 2,
+                    left: e.pageX - el_w / 2
+                });
+            }
+        });
+        $dragging = $(e.target);
+    }).on("mouseup", ".draggable", function(e) {
+		$dragging = null;
+        $(this).removeAttr('unselectable').removeClass('draggable');
+	});
+	
+	
+});​ 
+
+
+	
+	
 
 	/** Listens to inputFile and loads a file selected from windows prompt
 	 * Basically a way to seperate selecting a file from actually loading it
 	**/
 	$("#inputFile").on("change", function () {loadFile();});
 
-	//runs every time key is pressed when #command is focus
-	$("#command").on('keypress', function(e) {
+	//runs every time a key is pressed when #command is in focus
+	command.on('keypress', function(e) {
 		//checks if enter key is pressed
 		if(e.which === 13) {
-			let command : JQuery = $("#command");
-			doCommand(<string>command.val());
-			command.val("");
+			if (command.val() == "clear")
+				log.val("");
+			else if (command.val() == "")
+				apdLog("", log);
+			else {
+				apdLog(">" + command.val(), log);
+				apdLog (<string>doCommand(<string>command.val())[0], log);
+				log.scrollTop(log[0].scrollHeight);
+				command.val("");
+			}
 		}
 	});
 });
 
 //called functions
 
+
+function dropDownClick(className, option){
+
+	if (option == "Select an option...")
+	{
+		//Do NOTHING
+	}
+
+	if (option === "function ") {
+		let input = prompt("Please enter the " + option + "to add")
+
+		//basically, checks for the div with that name and then appends to it. It will always append to the
+		//correct div because the name is tied to each div uniquely.
+		//backend done
+		if (input && doCommand("addfun " + className + " " + input)[1]) {
+			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+		}
+		
+	} else if (option === "child ") {
+		//same idea as adding a class block to see if it already exists
+		let connectParent = prompt("Please enter the name of the parent to connect to");
+		let className = $('[name="' + connectParent + '"]').attr('name');
+		
+		//prevents connecting to an undefined/null classblock
+		//Connects parents and children
+		if (className == undefined) {
+			alert("Class name currently does not exist");
+			return;
+		} else if (className == null) {
+			return;
+		} else {
+			//TODO
+			//Run code to connect arrows, relationship
+		}
+
+
+		//backend done
+	} else if (option === "delete ") {
+		//find div based on name and remove
+		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
+			$('[name="' + className + '"]').remove();
+		}
+		else {
+			return;
+		}
+	//backend done	
+	} else if (option === "attribute ") {
+		let input = prompt("Please enter the " + option + "to add")
+		if (input && doCommand("addvar " + className + " " + input)[1]) {
+			$('[name="' + className + '"]').append("<li>" + input + "</li>");
+		}
+		
+	}
+}
+
+
 /** help (string)
  * is called when user gives an arguement to the help command
  * returns a string explaining specified command to the user
 **/
+
 function help(cmd : string) {
 	switch (cmd){
 		case "clear":
 			return ">clear\n"
 			+ " Clears terminal log";
-		break;
 
 		case "help":
 			return ">help <command>\n"
 			+ " Is helpful";
-		break;
 
 		case "create":
 			return ">create <classname>\n"
 			 + " Creates a block";
-		break;
+
+		case "addvar":
+			return ">addvar <targetclass> <var>\n"
+			 + " Adds a variable to target class";
+
+		case "delvar":
+			return ">delvar <targetclass> <var>\n"
+			 + " Deletes a variable from target class";
+
+		case "addfun":
+			return ">addvar <targetclass> <var>\n"
+			+ " Adds a function to target class";
+
+		case "delfun":
+			return ">create <classname>\n"
+			+ " Deletes a function from target class";
 
 		case "delete":
 			return ">delete <classname>\n"
 			 + " Deletes target class";
-		break;
 
 		case "print":
 			return ">print <targetclass>\n"
 			+ " Prints information on target class";
-		break;
 
 		case "printall":
 			return ">printall\n"
 			+ " Prints all current classes and their information";
-		break;
 
 		case "rename":
 			return ">rename <targetclass> <newname>\n"
 			+ " Changes a classes name";
-		break;
 
 		case "save":
 			return ">save\n"
 			 + " Prompts user to save diagram as .yml file";
-		break;
 
 		case "load":
 			return ">load\n"
 			 + " Loads diagram from loaded .yml file";
-		break;
 
 		case "loadfile":
 			return ">loadfile\n"
 			 + " Reveals a button that prompts for a file";
+		break;
+		
+		case "removeparent":
+			return ">removeparent\n"
+			 + " Removes the parent of a classblock." 
+		break;
+			
+		case "addparent":
+			return ">addparent\n"
+			 + " Adds a parent to a classblock."
+		break;
+			
+		case "getparent":
+			return ">getparent\n"
+			 + " Returns the parent of a classblock."
+		break;
+			
+		case "deletechild":
+			return ">deletechild\n"
+			 + " Removes a specific child from a classblock."
+		break;
+			
+		case "getchildren":
+			return ">getchildren\n"
+			 + " Returns all of the children for a classblock."
+		break;
+			
+		case "addchild":
+			return ">addchild\n"
+			 + " Adds a child to a classblock."
 		break;
 
 		default:
@@ -91,102 +301,267 @@ function help(cmd : string) {
 	}
 }
 
-/** doCommand (string)
+/** doCommand (string) returns tuple of [string, bool]
  * checks user input for command and executes it if it exists
  * otherwise only returns users input
 **/
 function doCommand(command : string) {
-	let log : JQuery = $("#log");
-		
-	apdLog(">" + command, log);
 
 	//reg expression for split to allow any number of spaces
 	let args : Array<string> = (command.split(/\s{1,}/));
 	args[0] = args[0].toLocaleLowerCase();
 
 	switch (args[0]) {
-		case "clear":
-			log.val("")	
-		break;
 
 		case "help":
 			if (args.length > 1) {
-				apdLog(help(args[1]), log);
+				return [help(args[1]), true];
 			} else {
-				apdLog(("list of commands\n"
+				return["list of commands\n"
 						+ ">clear\n"
 						+ ">create\n"
+						+ ">addvar\n"
+						+ ">delvar\n"
+						+ ">addfun\n"
+						+ ">delfun\n"
 						+ ">delete\n"
 						+ ">rename\n"
 						+ ">print\n"
 						+ ">printall\n"
 						+ ">save\n"
 						+ ">load\n"
-						+ "type >help <command> for instructions on that command")
-				, log);
+						+ "type >help <command> for instructions on that command", true];
 			}
-		break;
 
 		case "create":
 			if (userClasses.has(args[1])) {
-				apdLog("Name already in use. Please enter unique name.", log);
+				return ["Name already in use. Please enter unique name.", false];
 			} else if (args.length < 2 || args[1] == "") {
-				apdLog("Please enter a name after create, type <help> <create> for more info", log);
+				return ["Please enter a name after create, type <help> <create> for more info", false];
 			} else {
 				userClasses.set(args[1], new classBlock(args[1]));
-				apdLog(userClasses.get(args[1]).getName() + " created", log);
+				return [userClasses.get(args[1]).getName() + " created", true];
 			}
-		break;
 
 		case "delete":
 			if (userClasses.has(args[1])) {
 				userClasses.delete(args[1]);
-				apdLog(args[1] + " deleted", log);
+				return [args[1] + " deleted", true];
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
+
+		case "addvar":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).setVar(args[2])) {
+					return ["Var " + args[2] + " added to " + args[1], true];
+				} else {
+					return ["Var " + args[2] + " already exists in " + args[1], false];
+				}
+			} else {
+				return [args[1] + " class does not exist", false];
+			}
+
+		case "delvar":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).removeVar(args[2])) {
+					return ["Var " + args[2] + " deleted from " + args[1], true];
+				} else {
+					return ["Var " + args[2] + " does not exist in " + args[1], false];
+				}
+			} else {
+				return [args[1] + " class does not exist", false];
+			}
+
+		case "addfun":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).setFun(args[2])) {
+					return ["Fun " + args[2] + " added to " + args[1], true];
+				} else {
+					return ["Fun " + args[2] + " already exists in " + args[1], false];
+				}
+			} else {
+				return [args[1] + " class does not exist", false];
+			}
+
+		case "delfun":
+			if (userClasses.has(args[1])) {
+				if (userClasses.get(args[1]).removeFun(args[2])) {
+					return ["Fun " + args[2] + " deleted from " + args[1], true];
+				} else {
+					return ["Fun " + args[2] + " does not exist in " + args[1], false];
+				}
+			} else {
+				return [args[1] + " class does not exist", false];
+			}
 
 		case "print":
 			if (userClasses.has(args[1])) {
-				apdLog(userClasses.get(args[1]).print(), log);
+				return [userClasses.get(args[1]).print(), true];
 			} else {
-				apdLog(args[1] + " class does not exist", log);
+				return [args[1] + " class does not exist", false];
 			}
-		break;
 
 		case "printall":
+			let newLines : number = userClasses.size;
+			let blocks : string = "";
 			userClasses.forEach((block : classBlock) => {
-				apdLog(block.print(), log);
+				blocks += block.print();
+				if (newLines > 1) {
+					blocks += "\n";
+					--newLines;
+				}
 			});
-		break;
+			return [blocks, true];
 
 		case "rename":
 			if (args.length != 3) {
-				apdLog("Please use this format: >rename <targetclass> <newname>", log);
-				break;
+				return ["Please use this format: >rename <targetclass> <newname>", false];
 			} else if (!userClasses.has(args[1])) {
-				apdLog(args[1] + " does not exist", log);
-				break;
+				return [args[1] + " does not exist", false];
 			}
-			apdLog(rename(args[1], args[2]), log);
-		break;
+			return [rename(args[1], args[2]), true];
+
 
 		case "save":
 			saveFile();
-		break;
+			return ["Saving", true];
 
 		case "load":
 			selectFile();
-		break;
+			return ["Loading", true]
+
+		case "addparent":
+			if (args.length != 3) {
+				return ["format: >addparent <targetclass> <parentclass>", false];
+			} else if (!userClasses.has(args[1])) {
+				return [args[1] + " does not exist", false];
+			} else if (!userClasses.has(args[2])) {
+				return [args[2] + " does not exist", false];
+			}
+			return [addParent(args[1], args[2]), true];
+		
+		case "getparent": 
+			if (args.length != 2) {
+				return ["format: >getparent <targetclass>", false];
+			} else if (!userClasses.has(args[1])) {
+				return [args[1] + " does not exist", false];
+			}
+			return [getParent(args[1]), true];
+
+		case "removeparent":
+			if (args.length != 2) {
+				return ["format: >removeparent <targetclass>", false];
+			} else if (!userClasses.has(args[1])) {
+				return [args[1] + " does not exist", false];
+			}
+			return [removeParent(args[1]), true];
+
+		case "addchild":
+			if (args.length < 3) {
+				return ["format: >addchild <targetclass> <childclass>", false];
+			} else if (!userClasses.has(args[1])) {
+				return [args[1] + " does not exist", false];
+			} else if (!userClasses.has(args[2])) {
+				return [args[2] + " does not exist", false];
+			}
+			return [addChild(args[1], args[2]), true];
+
+		case "getchildren":
+			if (args.length != 2) {
+				return ["format: >getchildren <targetclass>", false];
+			} else if (!userClasses.has(args[1])) {
+				return [args[1] + " does not exist", false];
+			}
+			return [getChildren(args[1]), true];
+
+		case "deletechild":
+			if (args.length != 3) {
+				return ["format: >getchildren <targetclass>", false];
+			} else if (!userClasses.has(args[1])) {
+				return [args[1] + " does not exist", false];
+			} else if (!userClasses.has(args[2])) {
+				return [args[2] + " does not exist", false];
+			}
+			return [deleteChild(args[1], args[2]), true];
 
 		default:
-			apdLog(args[0] + " is not a command", log);
-		break;
+			return [args[0] + " is not a command", false];
 	}
-	log.scrollTop(log[0].scrollHeight);	
 }
 
+/**
+ * Returns the array of children for a specific class block.
+ * @param targetClass 
+ */
+function getChildren(targetClass : string)
+{
+	var array = userClasses.get(targetClass).getChildren();
+	if(array.length <= 0) {
+		return ("This class has no children");
+	}
+	return ("children: " + array);
+}
+
+/**
+ * Adds a child class to a specific class block.
+ * @param targetClass 
+ * @param childClass 
+ */
+function addChild(targetClass : string, childClass : string)
+{
+	userClasses.get(targetClass).addChild(childClass);
+	userClasses.get(childClass).setParent(targetClass);
+	return ("added " + childClass + " as a child to " + targetClass + ".");
+}
+
+/**
+ * Allows you to remove a child from a parents children array.
+ * @param targetClass 
+ * @param childClass 
+ */
+function deleteChild(targetClass : string, childClass : string)
+{
+	if((userClasses.get(targetClass).getChildren()).indexOf(childClass) > -1) {
+		userClasses.get(targetClass).removeChild(childClass);
+		return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+	}
+	return (childClass + " is not a child of " + targetClass + ".");
+}
+
+/**
+ * Returns the parent of a specific class block.
+ * @param targetClass 
+ */
+function getParent(targetClass : string)
+{
+	if(userClasses.get(targetClass).getParent() == null) {
+		return ("There is no parent class for " + targetClass + ".");
+	}
+	return ("The parent of " + targetClass + " is " + userClasses.get(targetClass).getParent() + ".");
+}
+
+/**
+ * Adds a parent to a specific class block.
+ * @param targetClass 
+ * @param parentClass 
+ */
+function addParent(targetClass : string, parentClass : string)
+{
+	userClasses.get(targetClass).setParent(parentClass);
+	userClasses.get(parentClass).addChild(targetClass);
+	return ("Added " + parentClass + " as the parent for " + targetClass);
+}
+
+/**
+ * Removes the current parent of the targetClass.
+ * @param targetClass 
+ */
+function removeParent(targetClass : string)
+{
+	userClasses.get(targetClass).removeParent();
+	return ("Removed the parent of " + targetClass + ".");
+}
 /** rename (string, string) returns string
  * Renames a class
 **/
@@ -206,7 +581,6 @@ function rename (oldName : string, newName : string) {
  * 		of a file into the html textarea.
  */
 function loadFile() {
-
 	// Grabs the file selected from the file input button.
 	//var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
 
@@ -222,6 +596,16 @@ function loadFile() {
 		let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
 		for (let i : number = 0; i < yaml.length; i++) {
 			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
+			yaml[i][1]["vars"].forEach(function(j) {
+				userClasses.get(yaml[i][0]).setVar(j);
+			});
+			yaml[i][1]["funs"].forEach(function(j) {
+				userClasses.get(yaml[i][0]).setFun(j);
+			});
+			userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);
+			yaml[i][1]["children"].forEach(function(j) {
+				userClasses.get(yaml[i][0]).addChild(j);
+			});
 		}
 	}
 	fileReader.readAsText(file, "UTF-8");

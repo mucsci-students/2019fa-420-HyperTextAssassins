@@ -1,0 +1,103 @@
+body{
+	width: 100vh;
+	height: 100vh;
+	margin: 0;
+}
+
+#page{
+	width: 1200px;
+	height: 1200px;
+}
+
+
+.classblock{
+	width: 150px;
+	height: 250px;
+	margin: 10px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: black;
+	text-align: center;
+	position: relative;
+	display: inline-block;
+	overflow: auto;
+	background-color: silver;
+}
+
+
+.child{
+	background-color: green;
+	position: relative;
+	text-align: center;
+}
+
+#toolbar{
+	border-right: 2px;	
+	height: 100%;
+	width: 50px;
+	background-color: silver;
+	margin: 0px;
+	margin-right: 5px;
+	float: left;
+	overflow: auto;
+}
+
+#add{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	padding: 50px 50px;
+	cursor: pointer;
+
+}
+
+#edit {
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
+	
+}
+
+#save{
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
+#load{
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
+#blockArea{
+	width: 1100px;
+	height: 1200px;
+	float: left;
+	background-color: gray;
+	overflow: auto;
+
+}
+
+.dropdown{
+	position: relative;
+	top: 225px !important;
+	left: 0px !important;
+}
+
+
+li{
+	text-align: left;
+	pointer-events: none;
+}
+
+.hidden {
+	display: none;
+}

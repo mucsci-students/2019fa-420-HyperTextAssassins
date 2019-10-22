@@ -16,11 +16,11 @@ $(function() {
 	//Button left hand side
 	$("#add").click(function(){
 
-		//get name from user and then check if the div exists	
+		//get name from user and then check if the div exists
 		let name = prompt("Please enter class name", "Class");
 		let className = $('[name="' + name + '"]').attr('name');
 
-		//if the name is found, className won't be undefined, so we know the 
+		//if the name is found, className won't be undefined, so we know the
 		//class name already exists
 		if (className != undefined) {
 			alert("Please enter a unique class name");
@@ -28,10 +28,13 @@ $(function() {
 		} 
 
 		//check if the name is null
-		if (name) {
+
+		if (name && doCommand("create " + name)[1]) {
 		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
 			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+		
 		}
+
 
 	});
 
@@ -54,12 +57,14 @@ $(function() {
 			item = item.toLowerCase().trim();
 
 			$('[name="' + name + '"]').children().each(function() {
-				console.log("hi");
-				if($(this).text() === item) {
-					console.log("Inside if")
+				if($(this).text() === item && doCommand("delvar " + name + " " + item)[1]) {
+					$(this).remove();
+				} else if($(this).text().slice(-2) === "()" && doCommand("delfun " + name + " " + item)[1]) {
 					$(this).remove();
 				}
+				
 			});
+		
 			
 		//handles editing attributes/functions
 		} else if (option.toLowerCase().trim() == "edit"){
@@ -77,6 +82,11 @@ $(function() {
 	});
 
 	$("#save").click(function() {
+		doCommand("save");
+	});
+
+	$("#load").click(function() {
+		doCommand("load");
 		
 	});
 
@@ -86,7 +96,6 @@ $(function() {
 	$(document).ready(function() {
     var $dragging = null;
     $('#blockArea').on("mousedown", "div", function(e) {
-		console.log("clicked block");
 		$(this).attr('unselectable', 'on').addClass('draggable');
         var el_w = $('.draggable').outerWidth(),
 			el_h = $('.draggable').outerHeight();
@@ -146,12 +155,12 @@ function dropDownClick(className, option){
 	}
 
 	if (option === "function ") {
-		console.log(option);
 		let input = prompt("Please enter the " + option + "to add")
 
 		//basically, checks for the div with that name and then appends to it. It will always append to the
 		//correct div because the name is tied to each div uniquely.
-		if (input) {
+		//backend done
+		if (input && doCommand("addfun " + className + " " + input)[1]) {
 			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
 		}
 		
@@ -172,18 +181,20 @@ function dropDownClick(className, option){
 			//Run code to connect arrows, relationship
 		}
 
+
+		//backend done
 	} else if (option === "delete ") {
 		//find div based on name and remove
-		if(confirm("Are you sure you want to delete this class?")){
+		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
 			$('[name="' + className + '"]').remove();
 		}
 		else {
 			return;
 		}
-		
+	//backend done	
 	} else if (option === "attribute ") {
 		let input = prompt("Please enter the " + option + "to add")
-		if (input) {
+		if (input && doCommand("addvar " + className + " " + input)[1]) {
 			$('[name="' + className + '"]').append("<li>" + input + "</li>");
 		}
 		
@@ -536,7 +547,6 @@ function rename (oldName : string, newName : string) {
  * 		of a file into the html textarea.
  */
 function loadFile() {
-
 	// Grabs the file selected from the file input button.
 	//var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
 
@@ -577,14 +587,14 @@ function selectFile() {
  */
 function saveFile() {
 	//var textContent = (<HTMLInputElement>document.getElementById("text")).value;
-	//let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
+	let diagramYaml : string = jsyaml.safeDump (Array.from(userClasses));
 
 	// The octet-stream indicates a binary file.
 	// The URI encoder will encode the UTF-8 text.
-	//var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
+	var uriContent = "data:application/octet-stream," + encodeURIComponent(diagramYaml);
 	
 	// Creates a clickable link to either open or save the file that was just create.
-	//document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
+	document.getElementById("link").outerHTML = "<a id=\"link\" href=" + uriContent + " download=\"diagram.yml\" class=\"hidden\">click me</a>";
 	document.getElementById("link").click();
 }
 

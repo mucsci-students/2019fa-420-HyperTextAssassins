@@ -26,6 +26,15 @@ class classBlock {
 				classOut += " " + i; 
 			});
 		}
+		if (this.parent != null) {
+			classOut += " Parent : " + this.parent;
+		}
+		if (this.children.length > 0 ) {
+			classOut += " Children :";
+			this.children.forEach(function(i) {
+				classOut += " " + i;
+			});
+		}
 		return classOut;
 	}
 

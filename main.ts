@@ -511,7 +511,7 @@ function addChild(targetClass : string, childClass : string)
  */
 function deleteChild(targetClass : string, childClass : string)
 {
-	if((userClasses.get(targetClass).getChildren()).includes(childClass)) {
+	if((userClasses.get(targetClass).getChildren()).indexOf(childClass) > -1) {
 		userClasses.get(targetClass).removeChild(childClass);
 		return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
 	}

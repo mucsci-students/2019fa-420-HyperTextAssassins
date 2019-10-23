@@ -13,7 +13,7 @@ $(function() {
 
 	//do on event
 
-	//Button left hand side
+	//When the add button is clicked in the toolbar
 	$("#add").click(function(){
 
 		//get name from user and then check if the div exists
@@ -27,8 +27,9 @@ $(function() {
 			return;
 		} 
 
-		//check if the name is null
-
+		//check if the name is null, and if doCommand successfully inserted the name into the userClasses map
+		//The long append string adds the actual visual class block element to the #blockArea. 
+		//Contains a dropdown menu for adding attributes, functions, children, and deleting the classBlock
 		if (name && doCommand("create " + name)[1]) {
 		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
 			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
@@ -38,32 +39,50 @@ $(function() {
 
 	});
 
-	//controls editing the class blocks
+	//When the edit button is clicked in the toolbar
 	$("#edit").click(function() {
 		let name = prompt("Please enter the name of the class you would like to edit", "Class");
+		//this construct helps us find the classBlock based on the 'name' attribute. No duplicate names are allowed,
+		//so we can always find the correct classBlock to edit
 		let className = $('[name="' + name + '"]');
 
+		//if the classblock doesn't exist
 		if(name == null) {
 			return;
 		} else if(className.attr('name') == undefined) {
 			alert("Cannot edit nonexistent class");
 			return;
 		}
-
+		//logic controls deleting functins and attributes
 		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
-		//handles deleting attributes
-		if(option.toLowerCase().trim() == "delete"){
-			let item = prompt("What is the name of the attribute/function you'd like to delete? ");
-			item = item.toLowerCase().trim();
+		if(option.toLowerCase().trim() == "delete") {
+			let delOption = prompt("would you like to delete a function or attribite? Type 'attribute' or 'delete' without quotes");
+			delOption = delOption.toLowerCase().trim();
 
-			$('[name="' + name + '"]').children().each(function() {
-				if($(this).text() === item && doCommand("delvar " + name + " " + item)[1]) {
-					$(this).remove();
-				} else if($(this).text().slice(-2) === "()" && doCommand("delfun " + name + " " + item)[1]) {
-					$(this).remove();
-				}
-				
+			if (delOption == 'attribute') {
+				let delAttr = prompt("What is the name of the attribute you'd like to delete? ");
+				delAttr = delAttr.toLowerCase().trim();
+				//for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
+				//deLAttr, the html <li> element is removed
+				$('[name="' + name + '"]').children().each(function() {
+					if($(this).text() === delAttr && doCommand("delvar " + name + " " + delAttr)[1]) {
+						$(this).remove();
+				} 
 			});
+		}
+			if (delOption == 'function') {
+				let delFunc = prompt("What is the name of the function you'd like to delete? ");
+				//same idea as attributes, but need to remove the parentheses to differentiate between functions
+				//and attributes with the same name
+				$('[name="' + name + '"]').children().each(function() {
+					delFunc = delFunc.toLowerCase().trim();
+					if($(this).text().slice(-2) === "()" && doCommand("delfun " + name + " " + delFunc)[1]) {
+						$(this).remove();
+					}
+				});
+		}
+			
+			
 		
 			
 		//handles editing attributes/functions
@@ -72,19 +91,22 @@ $(function() {
 			let newName = prompt("What would you like to rename it too? ");
 			itemToEdit = itemToEdit.toLowerCase().trim();
 			
+			//loop on all child elements. When it's found, replace the text with newName
 			$('[name="' + name + '"]').children().each(function() {
 				if($(this).text() === itemToEdit) {
 					$(this).text(newName);
 				}
 			});
-
 		}
 	});
 
+	//just runs backend command because GUI isn't needed here
 	$("#save").click(function() {
 		doCommand("save");
 	});
 
+
+	//ADD LOADING FUNCTIONALITY
 	$("#load").click(function() {
 		doCommand("load");
 		
@@ -146,7 +168,8 @@ $(function() {
 
 //called functions
 
-
+//This is the dropdown menu control function for all the drop downmenus in each classblock
+//use the name of the class based on the 'name' HTML attribute, take the drop down option as well
 function dropDownClick(className, option){
 
 	if (option == "Select an option...")
@@ -159,42 +182,44 @@ function dropDownClick(className, option){
 
 		//basically, checks for the div with that name and then appends to it. It will always append to the
 		//correct div because the name is tied to each div uniquely.
-		//backend done
 		if (input && doCommand("addfun " + className + " " + input)[1]) {
 			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
 		}
 		
 	} else if (option === "child ") {
 		//same idea as adding a class block to see if it already exists
-		let connectParent = prompt("Please enter the name of the parent to connect to");
-		let className = $('[name="' + connectParent + '"]').attr('name');
+		let parentDiv = $('[name="' + className + '"]');
+		let childName = prompt("Please enter the name of the new child block");
 		
 		//prevents connecting to an undefined/null classblock
 		//Connects parents and children
-		if (className == undefined) {
-			alert("Class name currently does not exist");
-			return;
-		} else if (className == null) {
+		if (childName == undefined || childName == null) {
+			alert("Please enter a chlild child name");
 			return;
 		} else {
-			//TODO
-			//Run code to connect arrows, relationship
+			//create a block with that name and draw a line to it
+			$("#add").click();
+			//code to draw line
+			let childDiv =$('[name="' + childName + '"]');
+
+			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
 		}
 
 
-		//backend done
+	
 	} else if (option === "delete ") {
-		//find div based on name and remove
+		//find div based on name and remove the entire classblock, including all child elements
 		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
 			$('[name="' + className + '"]').remove();
 		}
 		else {
 			return;
 		}
-	//backend done	
+		
 	} else if (option === "attribute ") {
 		let input = prompt("Please enter the " + option + "to add")
 		if (input && doCommand("addvar " + className + " " + input)[1]) {
+			//this setup lets us find the exact div to add based on the HTML 'name' tag.
 			$('[name="' + className + '"]').append("<li>" + input + "</li>");
 		}
 		
@@ -352,7 +377,9 @@ function doCommand(command : string) {
 			}
 
 		case "addvar":
-			if (userClasses.has(args[1])) {
+			if (args[2] == undefined || args[2] === ""){
+				return ["Cannot add undefined variable", false];
+			} else if (userClasses.has(args[1])) {
 				if (userClasses.get(args[1]).setVar(args[2])) {
 					return ["Var " + args[2] + " added to " + args[1], true];
 				} else {
@@ -374,6 +401,9 @@ function doCommand(command : string) {
 			}
 
 		case "addfun":
+			if (args[2] == undefined || args[2] === ""){
+				return ["Cannot add undefined variable", false];
+			}
 			if (userClasses.has(args[1])) {
 				if (userClasses.get(args[1]).setFun(args[2])) {
 					return ["Fun " + args[2] + " added to " + args[1], true];
@@ -381,7 +411,7 @@ function doCommand(command : string) {
 					return ["Fun " + args[2] + " already exists in " + args[1], false];
 				}
 			} else {
-				return [args[1] + " class does not exist", false];
+				return [args[1] + " class does not exist/cannot add null function", false];
 			}
 
 		case "delfun":

@@ -42,37 +42,31 @@ body{
 	overflow: auto;
 }
 
-#add{
-	height: 50px;
-	width: 90%;
-	margin: 5%;
+#add {
+	height: 4%;
+	width: 100%;
 	margin-bottom: 25px;
-	padding: 50px 50px;
 	cursor: pointer;
-
 }
 
 #edit {
-	width: 90%;
-	margin: 5%;
-	height: 50px;
+	height: 4%;
+	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
 	
 }
 
 #save{
-	width: 90%;
-	margin: 5%;
-	height: 50px;
+	height: 4%;
+	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
 }
 
 #load{
-	width: 90%;
-	margin: 5%;
-	height: 50px;
+	height: 4%;
+	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
 }

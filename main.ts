@@ -31,7 +31,7 @@ $(function() {
 		//The long append string adds the actual visual class block element to the #blockArea. 
 		//Contains a dropdown menu for adding attributes, functions, children, and deleting the classBlock
 		if (name && doCommand("create " + name)[1]) {
-		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
+		$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
 			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
 		
 		}
@@ -298,7 +298,7 @@ function dropDownClickLoad(className, option, input){
 	} else if (option === "child ") {
 		//same idea as adding a class block to see if it already exists
 		let parentDiv = $('[name="' + className + '"]');
-		let childName = prompt("Please enter the name of the new child block");
+		let childName = prompt("Please enter the name of the child block");
 		
 		//prevents connecting to an undefined/null classblock
 		//Connects parents and children
@@ -307,10 +307,12 @@ function dropDownClickLoad(className, option, input){
 			return;
 		} else {
 			//create a block with that name and draw a line to it
-			$("#add").click();
+			//$("#add").click();
 			//code to draw line
 			let childDiv =$('[name="' + childName + '"]');
-
+			var ep1 = jsPlumb.addEndpoint(childName),
+			ep2 = jsPlumb.addEndpoint(className);
+			jsPlumb.connect({ source:ep1, target:ep2 });
 			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
 		}
 

@@ -241,7 +241,7 @@ function dropDownClick(className, option){
 	} else if (option === "child ") {
 		//same idea as adding a class block to see if it already exists
 		let parentDiv = $('[name="' + className + '"]');
-		let childName = prompt("Please enter the name of the new child block");
+		let childName = prompt("Please enter the name of the child block");
 		
 		//prevents connecting to an undefined/null classblock
 		//Connects parents and children
@@ -253,7 +253,9 @@ function dropDownClick(className, option){
 			$("#add").click();
 			//code to draw line
 			let childDiv =$('[name="' + childName + '"]');
-
+			var ep1 = jsPlumb.addEndpoint(childName),
+			ep2 = jsPlumb.addEndpoint(className);
+			jsPlumb.connect({ source:ep1, target:ep2 });
 			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
 		}
 

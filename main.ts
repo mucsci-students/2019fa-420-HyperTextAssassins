@@ -59,6 +59,7 @@ $(function() {
 			let delOption = prompt("would you like to delete a function or attribite? Type 'attribute' or 'delete' without quotes");
 			delOption = delOption.toLowerCase().trim();
 
+			//deleting an attribute
 			if (delOption == 'attribute') {
 				let delAttr = prompt("What is the name of the attribute you'd like to delete? ");
 				delAttr = delAttr.toLowerCase().trim();
@@ -70,6 +71,7 @@ $(function() {
 				} 
 			});
 		}
+			//deleting a function
 			if (delOption == 'function') {
 				let delFunc = prompt("What is the name of the function you'd like to delete? ");
 				//same idea as attributes, but need to remove the parentheses to differentiate between functions
@@ -105,10 +107,60 @@ $(function() {
 		doCommand("save");
 	});
 
+	//need to sleep while user selects file
+	const sleep = (milliseconds) => {
+ 		return new Promise(resolve => setTimeout(resolve, milliseconds))
+	}
 
 	//ADD LOADING FUNCTIONALITY
 	$("#load").click(function() {
 		doCommand("load");
+		//need to sleep while file is loaded otherwise desynch
+		sleep(5000).then(() => {
+			//get data from modifed printall, put into an array with split
+			let loadString = printLoad();
+			let loopString = loadString.split(" ");
+		
+			//Outermost for loop walks through the whole string of data
+			for (let i = 0; i < loadString.length; ++i) {
+				//If the word found is class, reuse code for clicking the #add button
+				if (loopString[i] == "Class" && loopString[i+2] != ":") {
+					let name = loopString[i+2];
+					let className = $('[name="' + name + '"]').attr('name');
+
+					//just check if name is null
+					if (name) {
+					$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
+					" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+					}
+				}
+
+				//this takes care of loading the attributes and functions
+				if (loopString[i] == "Variables") {
+					//if we find the variables tag, the Class name is 1 behind it in the array
+					let className = loopString[i-1];
+
+					//this loop adds each variable/attribute to its repsective classblock.
+					//uses a modified dropDownClick where we use the loopString value
+					//in place of the alert prompt
+					while (loopString[i+2] != "Functions") {
+						dropDownClickLoad(className, "attribute ", loopString[i+2])
+						++i;
+					}
+					//get i to where the next "Functions" tag is
+					while(loopString[i] != "Functions") {
+						++i;
+					}
+
+					//need to make sure we don't run into the Class tag or end of the list. Otherwise,
+					//just run same logic but for functions
+					while (loopString[i] != "Class" && loopString[i+2] != "Class" && loopString[i] != null) {
+						dropDownClickLoad(className, "function ", loopString[i+2])
+						++i;
+					}
+				} 
+			}
+		})
 		
 	});
 
@@ -227,6 +279,62 @@ function dropDownClick(className, option){
 }
 
 
+function dropDownClickLoad(className, option, input){
+
+	if (option == "Select an option...")
+	{
+		//Do NOTHING
+	}
+
+	if (option === "function ") {
+	
+
+		//basically, checks for the div with that name and then appends to it. It will always append to the
+		//correct div because the name is tied to each div uniquely.
+		if (input) {
+			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+		}
+		
+	} else if (option === "child ") {
+		//same idea as adding a class block to see if it already exists
+		let parentDiv = $('[name="' + className + '"]');
+		let childName = prompt("Please enter the name of the new child block");
+		
+		//prevents connecting to an undefined/null classblock
+		//Connects parents and children
+		if (childName == undefined || childName == null) {
+			alert("Please enter a valid child name");
+			return;
+		} else {
+			//create a block with that name and draw a line to it
+			$("#add").click();
+			//code to draw line
+			let childDiv =$('[name="' + childName + '"]');
+
+			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
+		}
+
+
+	
+	} else if (option === "delete ") {
+		//find div based on name and remove the entire classblock, including all child elements
+		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
+			$('[name="' + className + '"]').remove();
+		}
+		else {
+			return;
+		}
+		
+	} else if (option === "attribute ") {
+		if (input) {
+			//this setup lets us find the exact div to add based on the HTML 'name' tag.
+			$('[name="' + className + '"]').append("<li>" + input + "</li>");
+		}
+		
+	}
+}
+
+
 /** help (string)
  * is called when user gives an arguement to the help command
  * returns a string explaining specified command to the user
@@ -324,6 +432,20 @@ function help(cmd : string) {
 		default:
 			return cmd + " is not a command"
 	}
+}
+
+function printLoad() {
+	let newLines : number = userClasses.size;
+	let blocks : string = "";
+	userClasses.forEach((block : classBlock) => {
+		blocks += block.print();
+			if (newLines > 1) {
+				blocks += " ";
+				--newLines;
+			}
+		});
+
+		return blocks;
 }
 
 /** doCommand (string) returns tuple of [string, bool]

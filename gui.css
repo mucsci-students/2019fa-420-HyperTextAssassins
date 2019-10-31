@@ -77,6 +77,34 @@ body{
 	cursor: pointer;
 }
 
+#function{
+	height: 50px;
+	width: 100%;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
+#attribute{
+	height: 4%;
+	width: 100%;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
+#child{
+	height: 4%;
+	width: 100%;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
+#delete{
+	height: 4%;
+	width: 100%;
+	margin-bottom: 25px;
+	cursor: pointer;
+}
+
 #blockArea{
 	width: 1100px;
 	height: 1200px;

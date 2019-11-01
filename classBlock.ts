@@ -111,6 +111,16 @@ class classBlock {
 		return true;
 	}
 
+	getFun()
+    {
+        return this.funs;
+    }
+
+    getVars()
+    {
+        return this.vars;
+    }
+
 	/**
 	 * Allows you to set the parent of the classblock.
 	 * @param parent 

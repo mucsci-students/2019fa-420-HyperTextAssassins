@@ -15,29 +15,38 @@ $(function() {
 
 	//do on event
 
-	//Button left hand side
+	function addBlock(name, load: boolean = false) {
+        let className = $('[name="' + name + '"]').attr('name');
+
+        //if the name is found, className won't be undefined, so we know the
+        //class name already exists
+        if (className != undefined) {
+            alert("Please enter a unique class name");
+            return;
+        }
+
+        //same code below but needed to bypass doCommand check when loading file 
+        //(other wise create will return false on load)
+        if (load == true) {
+            $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
+            " onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+        }
+
+        //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
+        //The long append string adds the actual visual class block element to the #blockArea. 
+        //Contains a dropdown menu for adding attributes, functions, children, and deleting the classBlock
+        if (name && doCommand("create " + name)[1]) {
+        $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
+            " onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+        
+        }
+    }
+
+    //click event for adding a class block
 	$("#add").click(function(){
-
 		//get name from user and then check if the div exists
-		let name = prompt("Please enter class name", "Class");
-		let className = $('[name="' + name + '"]').attr('name');
-
-		//if the name is found, className won't be undefined, so we know the
-		//class name already exists
-		if (className != undefined) {
-			alert("Please enter a unique class name");
-			return;
-		} 
-
-		//check if the name is null
-
-		if (name && doCommand("create " + name)[1]) {
-		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
-			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
-		
-		}
-
-
+        let name = prompt("Please enter class name", "Class");
+        addBlock(name);
 	});
 
 	//controls editing the class blocks
@@ -91,13 +100,20 @@ $(function() {
 		doCommand("save");
 	});
 
+	//loads into backend and GUI
 	$("#load").click(function() {
-		doCommand("load");
-		
+        doCommand("load");
 	});
 
-	function addFunction(name){
+	//adds a function to the class block. Optional parameters are used only for loading
+	function addFunction(name : string, input?: string, load: boolean = false){
 		let className = $('[name="' + name + '"]').attr('name');
+
+		//used only if loading to bypass prompt and doCommand check
+		if (load == true) {
+			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+			return;
+		}
 
 		if (className != undefined){
 			let input = prompt("Please enter the function you'd like to add to " + name + "(Don't include parentheses)")
@@ -118,8 +134,13 @@ $(function() {
 		
 	});
 
-	function addAttribute(name){
+	function addAttribute(name : string, input?: string, load: boolean = false){
 		let className = $('[name="' + name + '"]').attr('name');
+
+		if( load == true) {
+			$('[name="' + className + '"]').append("<li>" + input + "</li>");
+			return;
+		}
 
 		if (className != undefined){
 			let input = prompt("Please enter the attribute you'd like to add to " + name)
@@ -141,7 +162,8 @@ $(function() {
 		
 	});
 
-	function addChild(name) {
+	//used click event for addChild in GUI, also can be called by backend
+	function addChild(name : string) {
 		let parentDiv = $('[name="' + name + '"]');
 		
 		//prevents connecting to an undefined/null classblock
@@ -164,13 +186,15 @@ $(function() {
 			alert("Cannot add a child to a class that doesn't exist");
 		}
 	}
+	//click function for child. uses a prompt in the GUI
 	$("#child").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
 		addChild(name);
 		
 	});
 
-	function deleteClass(name){
+	//deletes class both in the GUI and backend
+	function deleteClass(name : string){
 		let classToDelete = $('[name="' + name + '"]');
 
 		//find div based on name and remove the entire classblock, including all child elements
@@ -183,6 +207,7 @@ $(function() {
 		}
 	}
 
+	//calls deleteClass() when GUI button is clicked
 	$("#delete").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to delete");
 		deleteClass(name);
@@ -193,7 +218,7 @@ $(function() {
 
 
 
-	//dragging
+	//function for dragging
 	$(document).ready(function() {
     var $dragging = null;
     $('#blockArea').on("mousedown", "div", function(e) {
@@ -222,12 +247,44 @@ $(function() {
 
 
 	
-	
+	//need to sleep while user selects file
+	const sleep = (milliseconds) => {
+ 		return new Promise(resolve => setTimeout(resolve, milliseconds))
+	}
 
 	/** Listens to inputFile and loads a file selected from windows prompt
 	 * Basically a way to seperate selecting a file from actually loading it
+	 * also does loading in the GUI. needs to be put here due to synching issues 
 	**/
-	$("#inputFile").on("change", function () {loadFile();});
+	$("#inputFile").on("change", function () {
+		loadFile();
+
+		//does the actual loading in the GUI
+		if($("#blockArea") != undefined) {
+			$("#blockArea").html("");
+			sleep(500).then(() => {
+				//turn the userClasses map into an array and iterate through it
+				for (let key of Array.from(userClasses.keys())) {
+
+            	    addBlock(key, true);
+
+            	    //get variables and functions into arrays based on the key value in the map
+	                let variables = userClasses.get(key).getVars();
+    	            let functions = userClasses.get(key).getFun();
+    				
+    				//loop through each array and add them to the corresponding classblock
+        	        variables.forEach(function (value) {
+            	    	addAttribute(key, value, true);
+                	});
+
+                	functions.forEach(function (value) {
+               	    	addFunction(key, value, true);
+               	 	});
+            	}
+            });
+		}
+	});
+
 
 	//runs every time a key is pressed when #command is in focus
 	command.on('keypress', function(e) {
@@ -687,7 +744,7 @@ function rename (oldName : string, newName : string) {
 function loadFile() {
 	// Grabs the file selected from the file input button.
 	//var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
-
+	
 	let inputFile = $("#inputFile");
 
 	var file : File = inputFile.prop('files')[0];
@@ -712,6 +769,7 @@ function loadFile() {
 			});
 		}
 	}
+
 	fileReader.readAsText(file, "UTF-8");
 
 }

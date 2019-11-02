@@ -28,16 +28,13 @@ $(function() {
         //same code below but needed to bypass doCommand check when loading file 
         //(other wise create will return false on load)
         if (load == true) {
-            $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
-            " onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+            $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + name + "</div>");
         }
 
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
-        //The long append string adds the actual visual class block element to the #blockArea. 
-        //Contains a dropdown menu for adding attributes, functions, children, and deleting the classBlock
+        //The appended html adds the visual class block element to the #blockArea.
         if (name && doCommand("create " + name)[1]) {
-        $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
-            " onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
+        $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + name +  "</div>");
         
         }
     }
@@ -48,6 +45,7 @@ $(function() {
         let name = prompt("Please enter class name", "Class");
         addBlock(name);
 	});
+
 
 	//controls editing the class blocks
 	$("#edit").click(function() {
@@ -96,16 +94,23 @@ $(function() {
 		}
 	});
 
+
+	//save button in GUI calls backend for saving file
 	$("#save").click(function() {
 		doCommand("save");
 	});
 
-	//loads into backend and GUI
+	//loads UML diagram into backend and GUI from an already saved yaml file
 	$("#load").click(function() {
         doCommand("load");
 	});
 
-	//adds a function to the class block. Optional parameters are used only for loading
+
+
+
+	/*
+	 * Adds a function to the class block. Optional parameters are used only for loading
+	 */
 	function addFunction(name : string, input?: string, load: boolean = false){
 		let className = $('[name="' + name + '"]').attr('name');
 
@@ -116,40 +121,61 @@ $(function() {
 		}
 
 		if (className != undefined){
-			let input = prompt("Please enter the function you'd like to add to " + name + "(Don't include parentheses)")
+			let input = prompt("Please enter the functions you'd like to add to " + name + " seperated by spaces (Don't include parentheses)");
+			let inputSplit : Array<string> = input.split(" ");
 			//basically, checks for the div with that name and then appends to it. It will always append to the
 			//correct div because the name is tied to each div uniquely.
-			if (input && doCommand("addfun " + className + " " + input)[1]) {
-				$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+			inputSplit.forEach(function(fun) {
+			if (fun && doCommand("addfun " + className + " " + fun)[1]) {
+				$('[name="' + className + '"]').append("<li>" + fun + "()</li>");
 			}
+		});
+
 		} else {
 			alert("Cannot add functions to a class that doesn't exist");
 		}
 	}
 
 	$("#function").click(function() {
-
 		let name = prompt("Please enter the name of the class you'd like to add a function to", "Class");
+		if (name == null) {
+			return;
+		}
 		addFunction(name);
-		
 	});
 
-	function addAttribute(name : string, input?: string, load: boolean = false){
-		let className = $('[name="' + name + '"]').attr('name');
 
-		if( load == true) {
+
+
+
+	/*
+	 * Adds a variable to the class block both in the GUI and backend representation. Has optional parameters
+	 * for loading explained below
+	 */
+	function addVariable(name : string, input?: string, load: boolean = false){
+		let className : string = $('[name="' + name + '"]').attr('name');
+
+		//uses optional parameters to bypass both the user input prompt with the input?: parameter, and doCommand check
+		//with the load parameter
+		if(load == true) {
 			$('[name="' + className + '"]').append("<li>" + input + "</li>");
 			return;
 		}
 
 		if (className != undefined){
-			let input = prompt("Please enter the attribute you'd like to add to " + name)
+			let input : string = prompt("Please enter the attributes you would like to add to  "+ name + " seperated by spaces ");
+			let inputSplit : Array<string> = input.split(" ");
 			//basically, checks for the div with that name and then appends to it. It will always append to the
 			//correct div because the name is tied to each div uniquely.
-			if (input && doCommand("addvar " + className + " " + input)[1]) {
-				//this setup lets us find the exact div to add based on the HTML 'name' tag.
-				$('[name="' + className + '"]').append("<li>" + input + "</li>");
-			}
+
+			//add each of the elements based on the split user input
+			inputSplit.forEach(function(attr) {
+				if (attr && doCommand("addvar " + className + " " + attr)[1]) {
+					//this setup lets us find the exact div to add based on the HTML 'name' tag.
+					$('[name="' + className + '"]').append("<li>" + attr + "</li>");
+				}
+			});
+
 		} else {
 			alert("Cannot add attribute. Class \"" + name + "\" doesn't exist");
 		}
@@ -157,10 +183,19 @@ $(function() {
 
 	$("#attribute").click(function() {
 
-		let name = prompt("Please enter the name of the class you'd like to add an attribute to", "Class");
-		addAttribute(name);
+		let name = prompt("Please enter the name of the class you'd like to add an attribute to");
+		if(name == null || name == undefined) {
+			return;
+		} else {
+			addVariable(name);
+		}
+		
 		
 	});
+
+
+
+
 
 	//used click event for addChild in GUI, also can be called by backend
 	function addChild(name : string) {
@@ -186,12 +221,17 @@ $(function() {
 			alert("Cannot add a child to a class that doesn't exist");
 		}
 	}
+
 	//click function for child. uses a prompt in the GUI
 	$("#child").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
 		addChild(name);
 		
 	});
+
+
+
+
 
 	//deletes class both in the GUI and backend
 	function deleteClass(name : string){
@@ -231,11 +271,20 @@ $(function() {
                 $dragging.offset({
                     top: e.pageY - el_h / 2,
                     left: e.pageX - el_w / 2
+
                 });
             }
+
         });
         $dragging = $(e.target);
     }).on("mouseup", ".draggable", function(e) {
+    	if($dragging.position().left <= 0 || $(this).position().top <= 0) {
+    		$dragging.offset({
+    			top: 10,
+    			left:75
+    		});
+	    }
+
 		$dragging = null;
         $(this).removeAttr('unselectable').removeClass('draggable');
 	});
@@ -261,7 +310,9 @@ $(function() {
 
 		//does the actual loading in the GUI
 		if($("#blockArea") != undefined) {
+			//clear block area for loading
 			$("#blockArea").html("");
+
 			sleep(500).then(() => {
 				//turn the userClasses map into an array and iterate through it
 				for (let key of Array.from(userClasses.keys())) {
@@ -274,7 +325,7 @@ $(function() {
     				
     				//loop through each array and add them to the corresponding classblock
         	        variables.forEach(function (value) {
-            	    	addAttribute(key, value, true);
+            	    	addVariable(key, value, true);
                 	});
 
                 	functions.forEach(function (value) {

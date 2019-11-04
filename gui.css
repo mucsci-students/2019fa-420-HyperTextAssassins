@@ -11,8 +11,10 @@ body{
 
 
 .classblock{
-	width: 150px;
-	height: 250px;
+	min-width: 150px;
+	width: auto;
+	height: auto;
+	min-height: 250px;
 	margin: 10px;
 	border-style: solid;
 	border-width: 1px;
@@ -22,6 +24,26 @@ body{
 	display: inline-block;
 	overflow: auto;
 	background-color: silver;
+	
+}
+
+.attributes{
+	border-bottom: solid;
+	border-width: 1px;
+	border-color: black;
+	height: auto;
+	width: auto;
+	min-height: 100px;
+	min-width: 100px;
+
+}
+
+.functions{
+	height: auto;
+	width: auto;
+	min-height: 100px;
+	min-width: 100px;
+
 }
 
 
@@ -77,14 +99,14 @@ body{
 	cursor: pointer;
 }
 
-#function{
+#functionButton{
 	height: 50px;
 	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
 }
 
-#attribute{
+#attributeButton{
 	height: 4%;
 	width: 100%;
 	margin-bottom: 25px;
@@ -106,8 +128,8 @@ body{
 }
 
 #blockArea{
-	width: 1100px;
-	height: 1200px;
+	width: 95%;
+	height: 100%;
 	float: left;
 	background-color: gray;
 	overflow: auto;

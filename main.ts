@@ -34,7 +34,10 @@ $(function() {
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
         //The appended html adds the visual class block element to the #blockArea.
         if (name && doCommand("create " + name)[1]) {
-        $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + name +  "</div>");
+		$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
+		$("#" + name).append("<div class= \"attributes\" id=" + name + "> " + "<i> Attributes </i>" + "</div");
+		$("#"+ name).append("<div class= \"functions\" id=" + name + "> " + "<i> Functions </i>" + "</div");
+
         
         }
     }
@@ -127,7 +130,7 @@ $(function() {
 			//correct div because the name is tied to each div uniquely.
 			inputSplit.forEach(function(fun) {
 			if (fun && doCommand("addfun " + className + " " + fun)[1]) {
-				$('[name="' + className + '"]').append("<li>" + fun + "()</li>");
+				$('[name="' + className + '"] .functions').append("<li>" + fun + "()</li>");
 			}
 		});
 
@@ -136,7 +139,7 @@ $(function() {
 		}
 	}
 
-	$("#function").click(function() {
+	$("#functionButton").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to add a function to", "Class");
 		if (name == null) {
 			return;
@@ -163,7 +166,7 @@ $(function() {
 		}
 
 		if (className != undefined){
-			let input : string = prompt("Please enter the attributes you would like to add to  "+ name + " seperated by spaces ");
+			let input : string = prompt("Please enter the attributes you would like to add to "+ name + ", seperated by spaces ");
 			let inputSplit : Array<string> = input.split(" ");
 			//basically, checks for the div with that name and then appends to it. It will always append to the
 			//correct div because the name is tied to each div uniquely.
@@ -172,7 +175,7 @@ $(function() {
 			inputSplit.forEach(function(attr) {
 				if (attr && doCommand("addvar " + className + " " + attr)[1]) {
 					//this setup lets us find the exact div to add based on the HTML 'name' tag.
-					$('[name="' + className + '"]').append("<li>" + attr + "</li>");
+					$('[name="' + className + '"] .attributes').append("<li>" + attr + "</li>");
 				}
 			});
 
@@ -181,7 +184,7 @@ $(function() {
 		}
 	}
 
-	$("#attribute").click(function() {
+	$("#attributeButton").click(function() {
 
 		let name = prompt("Please enter the name of the class you'd like to add an attribute to");
 		if(name == null || name == undefined) {

@@ -27,6 +27,18 @@ body{
 	
 }
 
+.classblock .attributes {
+	pointer-events: none;
+}
+
+.classblock .functions {
+	pointer-events: none;
+}
+
+.classblock strong {
+	pointer-events: none;
+}
+
 .attributes{
 	border-bottom: solid;
 	border-width: 1px;

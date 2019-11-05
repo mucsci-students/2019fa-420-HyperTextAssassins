@@ -35,7 +35,7 @@ $(function() {
         //The appended html adds the visual class block element to the #blockArea.
         if (name && doCommand("create " + name)[1]) {
 		$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
-		$("#" + name).append("<div class= \"attributes\" id=" + name + "> " + "<i> Attributes </i>" + "</div");
+		$("#" + name).append("<div class= \"attributes\" id=" + name + "> " + "<i> Attributes </strong>" + "</div");
 		$("#"+ name).append("<div class= \"functions\" id=" + name + "> " + "<i> Functions </i>" + "</div");
 
         
@@ -65,7 +65,7 @@ $(function() {
 		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
 
 		if(option.toLowerCase().trim() == "delete") {
-			let delOption = prompt("would you like to delete a function or attribute? Type 'attribute' or 'function' without quotes");
+			let delOption = prompt("would you like to delete a function or an attribute? Type 'attribute' or 'function' without quotes");
 			delOption = delOption.toLowerCase().trim();
 
 			//deleting an attribute
@@ -74,27 +74,55 @@ $(function() {
 				delAttr = delAttr.toLowerCase().trim();
 				//for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
 				//deLAttr, the html <li> element is removed
-				$('[name="' + name + '"]').children().each(function() {
+				$('[name="' + name + '"] .attributes').children().each(function() {
 					if($(this).text() === delAttr && doCommand("delvar " + name + " " + delAttr)[1]) {
 						$(this).remove();
-				} 
-			});
+					} 
+				});
+			} else if (delOption == "function"){
+				let delFun = prompt("What is the name of the function you'd like to delete? (Include parentheses)");
+				delFun = delFun + "()";
+				delFun = delFun.toLowerCase().trim();
+
+				$('[name="' + name + '"] .functions').children().each(function() {
+					if($(this).text().toLowerCase().trim() === delFun && doCommand("delfun " + name + " " + delFun)[1]) {
+						$(this).remove();
+					}
+				});
+
+			}
 		
 			
 		//handles editing attributes/functions
 		} else if (option.toLowerCase().trim() == "edit"){
-			let itemToEdit = prompt("What is the name of the attribute/function you'd like to edit? ");
-			let newName = prompt("What would you like to rename it too? ");
-			itemToEdit = itemToEdit.toLowerCase().trim();
+			let delOption = prompt("would you like to edit a function or an attribute? Type 'attribute' or 'function' without quotes");
+			if (delOption == "attribute"){
+				let itemToEdit = prompt("What is the name of the attribute you'd like to edit? ");
+				let newName = prompt("What would you like to rename it too? ");
+				itemToEdit = itemToEdit.toLowerCase().trim();
 			
-			$('[name="' + name + '"]').children().each(function() {
-				if($(this).text() === itemToEdit) {
-					$(this).text(newName);
-				}
-			});
+				$('[name="' + name + '"] .attributes').children().each(function() {
+					if($(this).text() === itemToEdit) {
+						$(this).text(newName);
+					}
+				});
+
+			} else if (delOption == "function"){
+				let itemToEdit = prompt("What is the name of the function you'd like to edit? " );
+				itemToEdit = itemToEdit + "()";
+				let newName = prompt("What would you like to rename it to? (Don't include parentheses)");
+				itemToEdit = itemToEdit.toLowerCase().trim();
+
+				$('[name="' + name + '"] .functions').children().each(function() {
+					if($(this).text() === itemToEdit) {
+						$(this).text(newName + "()");
+					}
+				});
+			}
+			
 
 		}
-		}
+		
 	});
 
 
@@ -120,6 +148,8 @@ $(function() {
 		//used only if loading to bypass prompt and doCommand check
 		if (load == true) {
 			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+			//$('[name="' + className + '"]').append("<li>" + input + "(" + paramsType + ") " + returnType</li>");
+
 			return;
 		}
 

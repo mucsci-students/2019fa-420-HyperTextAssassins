@@ -56,7 +56,7 @@ body{
 #toolbar{
 	border-right: 2px;	
 	height: 100%;
-	width: 50px;
+	width: 80px;
 	background-color: silver;
 	margin: 0px;
 	margin-right: 5px;
@@ -104,6 +104,7 @@ body{
 	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
+	overflow: hidden;
 }
 
 #attributeButton{
@@ -111,6 +112,7 @@ body{
 	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
+	overflow: hidden;
 }
 
 #child{
@@ -118,6 +120,7 @@ body{
 	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
+	overflow: hidden;
 }
 
 #delete{
@@ -125,10 +128,11 @@ body{
 	width: 100%;
 	margin-bottom: 25px;
 	cursor: pointer;
+	overflow: hidden;
 }
 
 #blockArea{
-	width: 95%;
+	width: 92%;
 	height: 100%;
 	float: left;
 	background-color: gray;

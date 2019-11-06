@@ -167,32 +167,9 @@ $(function() {
 
 
 	//dragging
-	$(document).ready(function() {
-    var $dragging = null;
-    $('#blockArea').on("mousedown", "div", function(e) {
-		$(this).attr('unselectable', 'on').addClass('draggable');
-        var el_w = $('.draggable').outerWidth(),
-			el_h = $('.draggable').outerHeight();
-			
-        $('#blockArea').on("mousemove", function(e) {
-            if ($dragging) {
-                $dragging.offset({
-                    top: e.pageY - el_h / 2,
-                    left: e.pageX - el_w / 2
-                });
-            }
-        });
-        $dragging = $(e.target);
-    }).on("mouseup", ".draggable", function(e) {
-		$dragging = null;
-        $(this).removeAttr('unselectable').removeClass('draggable');
+	$('#blockArea').on("mousedown", ".classblock", function(e) {
+		dragBlock();
 	});
-	
-	
-});​ 
-
-
-	
 	
 
 	/** Listens to inputFile and loads a file selected from windows prompt
@@ -219,6 +196,19 @@ $(function() {
 });
 
 //called functions
+
+/**
+ * Using jsPlumb to make a classblock draggable when clicked on.
+ */
+function dragBlock() {
+	var classBlock = jsPlumb.getInstance();
+	classBlock.draggable($(".classblock"), {
+        	drag:function() {
+			//need to repaint everything so the relationship lines follow.
+			jsPlumb.repaintEverything();
+		}
+	});
+}
 
 //This is the dropdown menu control function for all the drop downmenus in each classblock
 //use the name of the class based on the 'name' HTML attribute, take the drop down option as well

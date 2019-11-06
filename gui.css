@@ -27,7 +27,7 @@ body{
 	
 }
 
-.classblock .attributes {
+.classblock .variables {
 	pointer-events: none;
 }
 
@@ -39,10 +39,22 @@ body{
 	pointer-events: none;
 }
 
-.attributes{
+.classblock .variables strong {
+	color: red;
+}
+
+.classblock .functions strong {
+	color: green;
+}
+
+.classblock .functions li i {
+	color: yellow;
+}
+
+
+.variables{
 	border-bottom: solid;
 	border-width: 1px;
-	border-color: black;
 	height: auto;
 	width: auto;
 	min-height: 100px;
@@ -59,14 +71,14 @@ body{
 }
 
 
-.child{
+.child {
 	background-color: green;
 	position: relative;
 	text-align: center;
 }
 
 #toolbar{
-	border-right: 2px;	
+	border-right: 2px;
 	height: 100%;
 	width: 80px;
 	background-color: silver;
@@ -81,8 +93,8 @@ body{
 	width: 90%;
 	margin: 5%;
 	margin-bottom: 25px;
-	padding: 50px 50px;
 	cursor: pointer;
+	white-space: normal;
 
 }
 
@@ -113,34 +125,39 @@ body{
 
 #functionButton{
 	height: 50px;
-	width: 100%;
+	width: 90%;
+	margin: 5%;
 	margin-bottom: 25px;
 	cursor: pointer;
-	overflow: hidden;
+	white-space: normal;
+	
 }
 
-#attributeButton{
-	height: 4%;
-	width: 100%;
+#variableButton{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
 	margin-bottom: 25px;
 	cursor: pointer;
-	overflow: hidden;
+	white-space: normal;
 }
 
 #child{
-	height: 4%;
-	width: 100%;
+	height: 50px;
+	width: 90%;
+	margin: 5%;
 	margin-bottom: 25px;
 	cursor: pointer;
-	overflow: hidden;
+	white-space: normal;
 }
 
 #delete{
-	height: 4%;
-	width: 100%;
+	height: 50px;
+	width: 90%;
+	margin: 5%;
 	margin-bottom: 25px;
 	cursor: pointer;
-	overflow: hidden;
+	white-space: normal;
 }
 
 #blockArea{

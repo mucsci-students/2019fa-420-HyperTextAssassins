@@ -15,8 +15,10 @@ $(function() {
 
 	//do on event
 
+	
+
 	function addBlock(name, load: boolean = false) {
-        let className = $('[name="' + name + '"]').attr('name');
+        let className : string = $('[name="' + name + '"]').attr('name');
 
         //if the name is found, className won't be undefined, so we know the
         //class name already exists
@@ -34,18 +36,16 @@ $(function() {
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
         //The appended html adds the visual class block element to the #blockArea.
         if (name && doCommand("create " + name)[1]) {
-		$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
-		$("#" + name).append("<div class= \"attributes\" id=" + name + "> " + "<i> Attributes </strong>" + "</div");
-		$("#"+ name).append("<div class= \"functions\" id=" + name + "> " + "<i> Functions </i>" + "</div");
-
-        
+			$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
+			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
+			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
         }
     }
 
     //click event for adding a class block
 	$("#add").click(function(){
 		//get name from user and then check if the div exists
-        let name = prompt("Please enter class name", "Class");
+        let name : string = prompt("Please enter class name", "Class");
         addBlock(name);
 	});
 
@@ -55,6 +55,7 @@ $(function() {
 		let name = prompt("Please enter the name of the class you would like to edit", "Class");
 		let className = $('[name="' + name + '"]');
 
+		//check for editing a class that doesn't exist
 		if(name == null) {
 			return;
 		} else if(className.attr('name') == undefined) {
@@ -62,65 +63,93 @@ $(function() {
 			return;
 		}
 
-		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
+		let option : string = prompt("Would you like to delete or edit an existing variable or function? type 'delete' or 'edit' without quotes");
 
+		//case for deleteing variables and functions
 		if(option.toLowerCase().trim() == "delete") {
-			let delOption = prompt("would you like to delete a function or an attribute? Type 'attribute' or 'function' without quotes");
+			let delOption = prompt("would you like to delete a function or an variable? Type 'variable' or 'function' without quotes");
 			delOption = delOption.toLowerCase().trim();
 
-			//deleting an attribute
-			if (delOption == 'attribute') {
-				let delAttr = prompt("What is the name of the attribute you'd like to delete? ");
+			//deleting a variable
+			if (delOption == 'variable') {
+				let delAttr : string = prompt("What is the name of the variable you'd like to delete? ");
 				delAttr = delAttr.toLowerCase().trim();
-				//for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
-				//deLAttr, the html <li> element is removed
-				$('[name="' + name + '"] .attributes').children().each(function() {
-					if($(this).text() === delAttr && doCommand("delvar " + name + " " + delAttr)[1]) {
-						$(this).remove();
-					} 
-				});
-			} else if (delOption == "function"){
-				let delFun = prompt("What is the name of the function you'd like to delete? (Include parentheses)");
-				delFun = delFun + "()";
-				delFun = delFun.toLowerCase().trim();
 
-				$('[name="' + name + '"] .functions').children().each(function() {
-					if($(this).text().toLowerCase().trim() === delFun && doCommand("delfun " + name + " " + delFun)[1]) {
+				/*for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
+					deLAttr, the html <li> element is removed
+					checks the <li> tag up to but not including the first [. Then removes the html element if it's not found
+					also needs to pass doCommand*/
+
+				$('[name="' + name + '"] .variables').children().each(function() {
+					if($(this).text().substr(0, $(this).text().indexOf('[')) === delAttr 
+						&& doCommand("delvar " + name + " " + delAttr)[1]) {
 						$(this).remove();
 					}
 				});
 
+			//same idea for function
+			//FOR PARAMETERS: probably need to just check til the first (, then delete it if thats found
+			} else if (delOption == "function"){
+				let delFun : string = prompt("What is the name of the function you'd like to delete?");
+				delFun = delFun.toLowerCase().trim();
+				//need a string for () to find in gui, and then normal for doCommand
+
+				//finds the correct li with the correct function
+				
+
+				$('[name="' + name + '"] .functions').children().each(function() {
+					//need to parse the string correctly, remove the return type, and then the parameters to check
+					let deleteText : string = $(this).text();
+					let newString : string  = deleteText.substr(deleteText.indexOf(" ") + 1, deleteText.length);
+					let check : string = newString.substr(0, newString.indexOf("("));
+					check = check.trim();
+					//check is just the function name with nothing else, so just check if it matches the user input delFun
+					if(check === delFun 
+						&& doCommand("delfun " + name + " " + delFun)[1]) {
+						$(this).remove();
+					}
+				});
 			}
 		
 			
-		//handles editing attributes/functions
+		//handles editing variables/functions
 		} else if (option.toLowerCase().trim() == "edit"){
-			let delOption = prompt("would you like to edit a function or an attribute? Type 'attribute' or 'function' without quotes");
-			if (delOption == "attribute"){
-				let itemToEdit = prompt("What is the name of the attribute you'd like to edit? ");
-				let newName = prompt("What would you like to rename it too? ");
+			let editOption = prompt("would you like to edit a function or an variable? Type 'variable' or 'function' without quotes");
+
+			if (editOption == "variable") {
+				let itemToEdit : string = prompt("What is the name of the variable you'd like to edit? ");
+				let newName : string = prompt("What would you like to rename it to? (Put 'yes' after the new name if you'd like to edit the type as well)");
+
+				//if(newName.substring(new))
+
 				itemToEdit = itemToEdit.toLowerCase().trim();
-			
-				$('[name="' + name + '"] .attributes').children().each(function() {
-					if($(this).text() === itemToEdit) {
-						$(this).text(newName);
+				
+				//find the correct variable, use indexOf ot get string without the type at the end. Check if it equals user input
+				$('[name="' + name + '"] .variables').children().each(function() {
+					if($(this).text().substr(0, $(this).text().indexOf('[')) === itemToEdit && doCommand("rename" + " " + name + " " + newName)[1]) {
+						let type : string = $(this).text().substring($(this).text().indexOf('['), $(this).text().length);
+						$(this).html(newName + "<strong>" + type + "</strong>");
 					}
 				});
 
-			} else if (delOption == "function"){
-				let itemToEdit = prompt("What is the name of the function you'd like to edit? " );
-				itemToEdit = itemToEdit + "()";
+			} else if (editOption == "function"){
+				let itemToEdit = prompt("What is the name of the function you'd like to edit?");
 				let newName = prompt("What would you like to rename it to? (Don't include parentheses)");
+				
+
 				itemToEdit = itemToEdit.toLowerCase().trim();
 
+
+
 				$('[name="' + name + '"] .functions').children().each(function() {
-					if($(this).text() === itemToEdit) {
-						$(this).text(newName + "()");
+					let editFunction : Array<string> = $(this).text().split(" ");
+
+					if(editFunction[1] === itemToEdit && doCommand("rename" + " " + name + " " + newName)[1]) {
+						editFunction[1] = newName;
+						$(this).html("<li><i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>" + editFunction[2] + "</strong> </li>");
 					}
 				});
 			}
-			
-
 		}
 		
 	});
@@ -139,6 +168,8 @@ $(function() {
 
 
 
+
+
 	/*
 	 * Adds a function to the class block. Optional parameters are used only for loading
 	 */
@@ -148,19 +179,21 @@ $(function() {
 		//used only if loading to bypass prompt and doCommand check
 		if (load == true) {
 			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
-			//$('[name="' + className + '"]').append("<li>" + input + "(" + paramsType + ") " + returnType</li>");
-
 			return;
 		}
 
 		if (className != undefined){
-			let input = prompt("Please enter the functions you'd like to add to " + name + " seperated by spaces (Don't include parentheses)");
+			let input : string = prompt("Please enter the function you'd like to add to " + name);
+			let parameters : string = prompt("Please enter the parameters separated by a comma (no spaces between them");
+			let returnType : string = prompt("What is the return type?");
+
 			let inputSplit : Array<string> = input.split(" ");
+
 			//basically, checks for the div with that name and then appends to it. It will always append to the
 			//correct div because the name is tied to each div uniquely.
 			inputSplit.forEach(function(fun) {
 			if (fun && doCommand("addfun " + className + " " + fun)[1]) {
-				$('[name="' + className + '"] .functions').append("<li>" + fun + "()</li>");
+				$('[name="' + className + '"] .functions').append("<li><i>" + returnType + "</i> " + fun + " (<strong>" + parameters + "</strong>) </li>");
 			}
 		});
 
@@ -185,7 +218,7 @@ $(function() {
 	 * Adds a variable to the class block both in the GUI and backend representation. Has optional parameters
 	 * for loading explained below
 	 */
-	function addVariable(name : string, input?: string, load: boolean = false){
+	function addVariable(name : string, input?: string, load: boolean = false) {
 		let className : string = $('[name="' + name + '"]').attr('name');
 
 		//uses optional parameters to bypass both the user input prompt with the input?: parameter, and doCommand check
@@ -196,27 +229,35 @@ $(function() {
 		}
 
 		if (className != undefined){
-			let input : string = prompt("Please enter the attributes you would like to add to "+ name + ", seperated by spaces ");
-			let inputSplit : Array<string> = input.split(" ");
+			let input : string = prompt("Please enter the variables you would like to add to " + name);
+			let type : string = prompt("What is the type of this variable?");
+			
+			/*let inputSplit : Array<string> = input.split(" ");
+			inputSplit.forEach(function(variable) {
+				
+			});*/
+
+
 			//basically, checks for the div with that name and then appends to it. It will always append to the
 			//correct div because the name is tied to each div uniquely.
-
 			//add each of the elements based on the split user input
-			inputSplit.forEach(function(attr) {
-				if (attr && doCommand("addvar " + className + " " + attr)[1]) {
-					//this setup lets us find the exact div to add based on the HTML 'name' tag.
-					$('[name="' + className + '"] .attributes').append("<li>" + attr + "</li>");
-				}
-			});
+
+			if (input && type && doCommand("addvar " + className + " " + input)[1]) {
+				//this setup lets us find the exact div to add based on the HTML 'name' tag.
+				$('[name="' + className + '"] .variables').append("<li>" +  input +  "<strong>[" + type + "]</strong>" + "</li>");
+			} else {
+				alert("Please enter a valid variable name/type")
+			}
+
 
 		} else {
-			alert("Cannot add attribute. Class \"" + name + "\" doesn't exist");
+			alert("Cannot add variable. Class \"" + name + "\" doesn't exist");
 		}
 	}
 
-	$("#attributeButton").click(function() {
+	$("#variableButton").click(function() {
 
-		let name = prompt("Please enter the name of the class you'd like to add an attribute to");
+		let name = prompt("Please enter the name of the class you'd like to add a variable to");
 		if(name == null || name == undefined) {
 			return;
 		} else {
@@ -387,65 +428,6 @@ $(function() {
 		}
 	});
 });
-
-//called functions
-
-
-function dropDownClick(className, option){
-
-	if (option == "Select an option...")
-	{
-		//Do NOTHING
-	}
-
-	
-	if (option === "function ") {
-		let input = prompt("Please enter the " + option + "to add")
-
-		//basically, checks for the div with that name and then appends to it. It will always append to the
-		//correct div because the name is tied to each div uniquely.
-		//backend done
-		if (input && doCommand("addfun " + className + " " + input)[1]) {
-			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
-		}
-		
-	} else if (option === "child ") {
-		//same idea as adding a class block to see if it already exists
-		let connectParent = prompt("Please enter the name of the parent to connect to");
-		let className = $('[name="' + connectParent + '"]').attr('name');
-		
-		//prevents connecting to an undefined/null classblock
-		//Connects parents and children
-		if (className == undefined) {
-			alert("Class name currently does not exist");
-			return;
-		} else if (className == null) {
-			return;
-		} else {
-			//TODO
-			//Run code to connect arrows, relationship
-		}
-
-
-		//backend done
-	} else if (option === "delete ") {
-		//find div based on name and remove
-		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
-			$('[name="' + className + '"]').remove();
-		}
-		else {
-			return;
-		}
-	//backend done	
-	} else if (option === "attribute ") {
-		let input = prompt("Please enter the " + option + "to add")
-		if (input && doCommand("addvar " + className + " " + input)[1]) {
-			$('[name="' + className + '"]').append("<li>" + input + "</li>");
-		}
-		
-	}
-}
-
 
 /** help (string)
  * is called when user gives an arguement to the help command

@@ -104,6 +104,8 @@ body{
 	height: 50px;
 	margin-bottom: 25px;
 	cursor: pointer;
+	white-space: normal;
+	text-overflow: hidden;
 	
 }
 
@@ -167,14 +169,8 @@ body{
 	background-color: gray;
 	overflow: auto;
 
-}
 
-.dropdown{
-	position: relative;
-	top: 225px !important;
-	left: 0px !important;
 }
-
 
 li{
 	text-align: left;

@@ -18,6 +18,12 @@ $(function() {
 	
 
 	function addBlock(name, load: boolean = false) {
+		//check for whitespace in name
+		if (name.indexOf(" ") > 0) {
+			alert("Please enter Class name without spaces");
+			return;
+		}
+
         let className : string = $('[name="' + name + '"]').attr('name');
 
         //if the name is found, className won't be undefined, so we know the
@@ -30,7 +36,9 @@ $(function() {
         //same code below but needed to bypass doCommand check when loading file 
         //(other wise create will return false on load)
         if (load == true) {
-            $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + name + "</div>");
+            $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
+			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
+			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
         }
 
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
@@ -99,13 +107,14 @@ $(function() {
 
 				$('[name="' + name + '"] .functions').children().each(function() {
 					//need to parse the string correctly, remove the return type, and then the parameters to check
+					console.log("did a thing");
 					let deleteText : string = $(this).text();
 					let newString : string  = deleteText.substr(deleteText.indexOf(" ") + 1, deleteText.length);
 					let check : string = newString.substr(0, newString.indexOf("("));
-					check = check.trim();
+					console.log(check);
 					//check is just the function name with nothing else, so just check if it matches the user input delFun
-					if(check === delFun 
-						&& doCommand("delfun " + name + " " + delFun)[1]) {
+					if(check.toLowerCase().trim() === delFun 
+						&& doCommand("delfun " + name + " " + check)[1]) {
 						$(this).remove();
 					}
 				});
@@ -119,32 +128,24 @@ $(function() {
 			if (editOption == "variable") {
 				let itemToEdit : string = prompt("What is the name of the variable you'd like to edit? ");
 				let newName : string = prompt("What would you like to rename it to? (Put 'yes' after the new name if you'd like to edit the type as well)");
-
-				//if(newName.substring(new))
-
-				itemToEdit = itemToEdit.toLowerCase().trim();
 				
 				//find the correct variable, use indexOf ot get string without the type at the end. Check if it equals user input
 				$('[name="' + name + '"] .variables').children().each(function() {
-					if($(this).text().substr(0, $(this).text().indexOf('[')) === itemToEdit && doCommand("rename" + " " + name + " " + newName)[1]) {
-						let type : string = $(this).text().substring($(this).text().indexOf('['), $(this).text().length);
-						$(this).html(newName + "<strong>" + type + "</strong>");
+					let editVariable : Array<string> = $(this).text().split("[");
+					if(editVariable[0] == itemToEdit) {
+
+						$(this).html(newName + "<strong>[" + editVariable[1] + "</strong>");
 					}
 				});
 
 			} else if (editOption == "function"){
 				let itemToEdit = prompt("What is the name of the function you'd like to edit?");
 				let newName = prompt("What would you like to rename it to? (Don't include parentheses)");
-				
-
-				itemToEdit = itemToEdit.toLowerCase().trim();
-
-
 
 				$('[name="' + name + '"] .functions').children().each(function() {
 					let editFunction : Array<string> = $(this).text().split(" ");
 
-					if(editFunction[1] === itemToEdit && doCommand("rename" + " " + name + " " + newName)[1]) {
+					if(editFunction[1] === itemToEdit) {
 						editFunction[1] = newName;
 						$(this).html("<li><i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>" + editFunction[2] + "</strong> </li>");
 					}
@@ -229,7 +230,7 @@ $(function() {
 		}
 
 		if (className != undefined){
-			let input : string = prompt("Please enter the variables you would like to add to " + name);
+			let input : string = prompt("Please enter the variable you would like to add to " + name);
 			let type : string = prompt("What is the type of this variable?");
 			
 			/*let inputSplit : Array<string> = input.split(" ");
@@ -273,11 +274,11 @@ $(function() {
 
 	//used click event for addChild in GUI, also can be called by backend
 	function addChild(name : string) {
-		let parentDiv = $('[name="' + name + '"]');
+		let parentDiv = $('[name="' + name + '"]').attr("name");
 		
 		//prevents connecting to an undefined/null classblock
 		//Connects parents and children
-		if (parentDiv != undefined){
+		if (parentDiv != undefined) {
 			let childName = prompt("Please enter the name of the new child block");
 
 			if (childName == undefined || childName == null) {
@@ -285,11 +286,14 @@ $(function() {
 				return;
 			} else {
 				//create a block with that name and draw a line to it
-				$("#add").click();
+				addBlock(childName);
+
 				//code to draw line
 				let childDiv =$('[name="' + childName + '"]');
-
-				//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
+				var ep1 = jsPlumb.addEndpoint(childName),
+				ep2 = jsPlumb.addEndpoint(parentDiv);
+				jsPlumb.connect({ source:ep1, target:ep2 });
+			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
 			}
 		} else {
 			alert("Cannot add a child to a class that doesn't exist");
@@ -331,7 +335,7 @@ $(function() {
 
 
 
-
+/*
 	//function for dragging
 	$(document).ready(function() {
     var $dragging = null;
@@ -354,8 +358,8 @@ $(function() {
     }).on("mouseup", ".draggable", function(e) {
     	if($dragging.position().left <= 0 || $(this).position().top <= 0) {
     		$dragging.offset({
-    			top: 10,
-    			left:75
+    			top: 40,
+    			left:100
     		});
 	    }
 
@@ -364,8 +368,25 @@ $(function() {
 	});
 	
 	
-});​ 
+});​ */
 
+
+	//dragging
+	//FIX tomorrow
+	$('#blockArea').on("mousedown", ".classblock", function(e) {
+		dragBlock();
+	});
+
+	function dragBlock() {
+		let classBlock = jsPlumb.getInstance();
+		classBlock.draggable($(".classblock"), {
+				containment: true,
+        		drag:function() {
+				//need to repaint everything so the relationship lines follow.
+				jsPlumb.repaintEverything();
+			}
+		});
+	}
 
 
 
@@ -377,7 +398,7 @@ $(function() {
 
 	/** Listens to inputFile and loads a file selected from windows prompt
 	 * Basically a way to seperate selecting a file from actually loading it
-	 * also does loading in the GUI. needs to be put here due to synching issues 
+	 * also does loading in the GUI. needs to be put here due to synchinpmng issues 
 	**/
 	$("#inputFile").on("change", function () {
 		loadFile();

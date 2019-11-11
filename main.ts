@@ -17,7 +17,7 @@ $(function() {
 
 	
 
-	function addBlock(name, load: boolean = false) {
+	function addBlock(name : string, load: boolean = false) {
 		//check for whitespace in name
 		if (name.indexOf(" ") > 0) {
 			alert("Please enter Class name without spaces");
@@ -32,6 +32,8 @@ $(function() {
             alert("Please enter a unique class name");
             return;
         }
+
+        name = name.replace(/<\/?[^>]+(>|$)/g, "");
 
         //same code below but needed to bypass doCommand check when loading file 
         //(other wise create will return false on load)
@@ -155,6 +157,21 @@ $(function() {
 		
 	});
 
+	$("#renameClass").click(function(){
+        let oldName : string = prompt("What is the name of the class you want to rename?")
+        if(userClasses.get(oldName)){
+            let newName : string = prompt("What would you like to rename it to?");
+            userClasses.get(oldName).setName(newName);
+            userClasses.set(newName, userClasses.get(oldName));
+            $('[name="' + oldName + '"] strong').text(newName);
+            $('[name="' + oldName + '"]').attr("name", newName);
+            userClasses.delete(oldName);
+            
+        } else {
+            alert("You can't rename classes that don't exist");
+        }
+    });
+
 
 	//save button in GUI calls backend for saving file
 	$("#save").click(function() {
@@ -188,6 +205,11 @@ $(function() {
 			let parameters : string = prompt("Please enter the parameters separated by a comma (no spaces between them");
 			let returnType : string = prompt("What is the return type?");
 
+			//check for a blank entry, just default to void return type
+			if (returnType.trim() == undefined || returnType.trim() == "") {
+				returnType = "void";
+			}
+
 			let inputSplit : Array<string> = input.split(" ");
 
 			//basically, checks for the div with that name and then appends to it. It will always append to the
@@ -210,9 +232,6 @@ $(function() {
 		}
 		addFunction(name);
 	});
-
-
-
 
 
 	/*
@@ -257,7 +276,6 @@ $(function() {
 	}
 
 	$("#variableButton").click(function() {
-
 		let name = prompt("Please enter the name of the class you'd like to add a variable to");
 		if(name == null || name == undefined) {
 			return;

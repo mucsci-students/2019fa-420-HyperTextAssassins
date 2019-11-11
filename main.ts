@@ -38,7 +38,8 @@ $(function() {
         //same code below but needed to bypass doCommand check when loading file 
         //(other wise create will return false on load)
         if (load == true) {
-            $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
+          $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <strong>" + name + "</strong>"+  "</div>");
+
 			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
 			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
         }
@@ -238,13 +239,13 @@ $(function() {
 	 * Adds a variable to the class block both in the GUI and backend representation. Has optional parameters
 	 * for loading explained below
 	 */
-	function addVariable(name : string, input?: string, load: boolean = false) {
+	function addVariable(name : string, input?: string[], load: boolean = false) {
 		let className : string = $('[name="' + name + '"]').attr('name');
 
 		//uses optional parameters to bypass both the user input prompt with the input?: parameter, and doCommand check
 		//with the load parameter
 		if(load == true) {
-			$('[name="' + className + '"]').append("<li>" + input + "</li>");
+			$('[name="' + className + '"] .variables').append("<li>" + "<strong>&lt;" + input[0] + "&gt;</strong>" + input[1] + "</li>");
 			return;
 		}
 
@@ -262,9 +263,9 @@ $(function() {
 			//correct div because the name is tied to each div uniquely.
 			//add each of the elements based on the split user input
 
-			if (input && type && doCommand("addvar " + className + " " + input)[1]) {
+			if (input && type && doCommand("addvar " + className + " " + type + " " + input)[1]) {
 				//this setup lets us find the exact div to add based on the HTML 'name' tag.
-				$('[name="' + className + '"] .variables').append("<li>" +  input +  "<strong>[" + type + "]</strong>" + "</li>");
+				$('[name="' + className + '"] .variables').append("<li>" + "<strong>&lt;" + type + "&gt;</strong>" + input + "</li>");
 			} else {
 				alert("Please enter a valid variable name/type")
 			}
@@ -399,7 +400,7 @@ $(function() {
 	});
 	
 	
-});​ */
+}); */
 
 
 	//dragging
@@ -467,9 +468,10 @@ $(function() {
 	command.on('keypress', function(e) {
 		//checks if enter key is pressed
 		if(e.which === 13) {
-			if (command.val() == "clear")
+			if (command.val() == "clear") {
 				log.val("");
-			else if (command.val() == "")
+				command.val("");
+			} else if (command.val() == "")
 				apdLog("", log);
 			else {
 				apdLog(">" + command.val(), log);
@@ -501,8 +503,12 @@ function help(cmd : string) {
 			 + " Creates a block";
 
 		case "addvar":
-			return ">addvar <targetclass> <var>\n"
+			return ">addvar <targetclass> <type> <var>\n"
 			 + " Adds a variable to target class";
+
+		case "editvartype":
+			return ">editvartype <targetclass> <newtype> <targetvar>\n"
+			 + " Changes the type of the target variable";
 
 		case "delvar":
 			return ">delvar <targetclass> <var>\n"
@@ -539,41 +545,30 @@ function help(cmd : string) {
 		case "load":
 			return ">load\n"
 			 + " Loads diagram from loaded .yml file";
-
-		case "loadfile":
-			return ">loadfile\n"
-			 + " Reveals a button that prompts for a file";
-		break;
 		
 		case "removeparent":
 			return ">removeparent\n"
 			 + " Removes the parent of a classblock." 
-		break;
 			
 		case "addparent":
 			return ">addparent\n"
 			 + " Adds a parent to a classblock."
-		break;
 			
 		case "getparent":
 			return ">getparent\n"
 			 + " Returns the parent of a classblock."
-		break;
 			
 		case "deletechild":
 			return ">deletechild\n"
 			 + " Removes a specific child from a classblock."
-		break;
 			
 		case "getchildren":
 			return ">getchildren\n"
 			 + " Returns all of the children for a classblock."
-		break;
 			
 		case "addchild":
 			return ">addchild\n"
 			 + " Adds a child to a classblock."
-		break;
 
 		default:
 			return cmd + " is not a command"
@@ -599,12 +594,13 @@ function doCommand(command : string) {
 				return["list of commands\n"
 						+ ">clear\n"
 						+ ">create\n"
-						+ ">addvar\n"
-						+ ">delvar\n"
-						+ ">addfun\n"
-						+ ">delfun\n"
 						+ ">delete\n"
 						+ ">rename\n"
+						+ ">addvar\n"
+						+ ">delvar\n"
+						+ ">editvartype\n"
+						+ ">addfun\n"
+						+ ">delfun\n"
 						+ ">print\n"
 						+ ">printall\n"
 						+ ">save\n"
@@ -632,10 +628,23 @@ function doCommand(command : string) {
 
 		case "addvar":
 			if (userClasses.has(args[1])) {
-				if (userClasses.get(args[1]).setVar(args[2])) {
-					return ["Var " + args[2] + " added to " + args[1], true];
+				if (args.length < 4 || args[3] == "") { 
+					return ["Please enter a target class, type, and name after addvar, type <help> <addvar> for more info", false];
+				} else if (userClasses.get(args[1]).setVar(args[2], args[3])) {
+					return ["Var <" + args[2] + "> " + args[3] +" added to " + args[1], true];
 				} else {
-					return ["Var " + args[2] + " already exists in " + args[1], false];
+					return ["Var " + args[3] + " already exists in " + args[1], false];
+				}
+			} else {
+				return [args[1] + " class does not exist", false];
+			}
+
+		case "editvartype":
+			if (userClasses.has(args[1])) {
+				if (args.length < 4 || args[3] == "") { 
+					return ["Please enter a target class, new type, and variable after editvartype, type <help> <editvartype> for more info", false];
+				} else if (userClasses.get(args[1]).editVar(args[2], args[3])) {
+					return ["Var " + args[3] + " is now type <" + args[2] + "> in " + args[1], true];
 				}
 			} else {
 				return [args[1] + " class does not exist", false];
@@ -876,7 +885,7 @@ function loadFile() {
 		for (let i : number = 0; i < yaml.length; i++) {
 			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
 			yaml[i][1]["vars"].forEach(function(j) {
-				userClasses.get(yaml[i][0]).setVar(j);
+				userClasses.get(yaml[i][0]).setVar(j[0], j[1]);
 			});
 			yaml[i][1]["funs"].forEach(function(j) {
 				userClasses.get(yaml[i][0]).setFun(j);

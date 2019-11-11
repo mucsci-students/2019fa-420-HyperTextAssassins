@@ -164,35 +164,10 @@ $(function() {
 		
 	});
 
-
-
 	//dragging
-	$(document).ready(function() {
-    var $dragging = null;
-    $('#blockArea').on("mousedown", "div", function(e) {
-		$(this).attr('unselectable', 'on').addClass('draggable');
-        var el_w = $('.draggable').outerWidth(),
-			el_h = $('.draggable').outerHeight();
-			
-        $('#blockArea').on("mousemove", function(e) {
-            if ($dragging) {
-                $dragging.offset({
-                    top: e.pageY - el_h / 2,
-                    left: e.pageX - el_w / 2
-                });
-            }
-        });
-        $dragging = $(e.target);
-    }).on("mouseup", ".draggable", function(e) {
-		$dragging = null;
-        $(this).removeAttr('unselectable').removeClass('draggable');
+	$('#blockArea').on("mousedown", ".classblock", function(e) {
+		dragBlock();
 	});
-	
-	
-});​ 
-
-
-	
 	
 
 	/** Listens to inputFile and loads a file selected from windows prompt
@@ -220,6 +195,17 @@ $(function() {
 
 //called functions
 
+/**
+ * Using jsPlumb to make a classblock draggable
+ */
+function dragBlock() {
+	var classBlock = jsPlumb.getInstance();
+    classBlock.draggable($(".classblock"), {
+        drag:function() {
+			jsPlumb.repaintEverything();
+		}
+	});
+}
 //This is the dropdown menu control function for all the drop downmenus in each classblock
 //use the name of the class based on the 'name' HTML attribute, take the drop down option as well
 function dropDownClick(className, option){
@@ -240,27 +226,16 @@ function dropDownClick(className, option){
 		
 	} else if (option === "child ") {
 		//same idea as adding a class block to see if it already exists
-		let parentDiv = $('[name="' + className + '"]');
 		let childName = prompt("Please enter the name of the child block");
 		
 		//prevents connecting to an undefined/null classblock
 		//Connects parents and children
 		if (childName == undefined || childName == null) {
-			alert("Please enter a chlild child name");
+			alert("Please enter a valid child name");
 			return;
 		} else {
-			//create a block with that name and draw a line to it
-			$("#add").click();
-			//code to draw line
-			let childDiv =$('[name="' + childName + '"]');
-			var ep1 = jsPlumb.addEndpoint(childName),
-			ep2 = jsPlumb.addEndpoint(className);
-			jsPlumb.connect({ source:ep1, target:ep2 });
-			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
+			//jsplumb
 		}
-
-
-	
 	} else if (option === "delete ") {
 		//find div based on name and remove the entire classblock, including all child elements
 		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
@@ -461,7 +436,6 @@ function doCommand(command : string) {
 	//reg expression for split to allow any number of spaces
 	let args : Array<string> = (command.split(/\s{1,}/));
 	args[0] = args[0].toLocaleLowerCase();
-
 	switch (args[0]) {
 
 		case "help":
@@ -495,11 +469,12 @@ function doCommand(command : string) {
 			}
 
 		case "delete":
-			if (userClasses.has(args[1])) {
-				userClasses.delete(args[1]);
-				return [args[1] + " deleted", true];
-			} else {
+			if (args.length != 2) {
+				return ["Please use this format: >delete <targetclass>", false];
+			} else if (!userClasses.has(args[1])) {
 				return [args[1] + " class does not exist", false];
+			} else {
+				return [deleteClassBlock(args[1]), true];
 			}
 
 		case "addvar":
@@ -595,7 +570,7 @@ function doCommand(command : string) {
 			} else if (!userClasses.has(args[2])) {
 				return [args[2] + " does not exist", false];
 			}
-			return [addParent(args[1], args[2]), true];
+			return [addParent(args[1], args[2], args[3]), true];
 		
 		case "getparent": 
 			if (args.length != 2) {
@@ -614,14 +589,14 @@ function doCommand(command : string) {
 			return [removeParent(args[1]), true];
 
 		case "addchild":
-			if (args.length < 3) {
-				return ["format: >addchild <targetclass> <childclass>", false];
+			if (args.length != 4) {
+				return ["format: >addchild <targetclass> <childclass> <relationship>", false];
 			} else if (!userClasses.has(args[1])) {
 				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
 				return [args[2] + " does not exist", false];
 			}
-			return [addChild(args[1], args[2]), true];
+			return [addChild(args[1], args[2], args[3]), true];
 
 		case "getchildren":
 			if (args.length != 2) {
@@ -647,28 +622,69 @@ function doCommand(command : string) {
 }
 
 /**
+ * Function for deleting a classblock.
+ * Needs to check if the classblock has children,
+ * 	if so it will delete accordingly based on their relationship.
+ * @param targetClass 
+ */
+function deleteClassBlock(targetClass : string)
+{
+	var target = userClasses.get(targetClass);
+	//checking for children.
+	if (target.getChildren().length > 0) {
+		//Runs through each child and performs the correct action.
+		//Based on their relationship with the classblack we are deleting.
+		target.getChildren().forEach(child => {
+			var c = userClasses.get(child[0]);
+			if (child[1] === "strong") {
+				userClasses.delete(child[0]);
+			} else if (child[1] === "is-a") {
+				//remove all vars/func
+				c.removeAllFun();
+				c.removeAllVar();
+			} else if (child[1] === "impl") {
+				//TODO
+			}
+			c.removeParent();
+		});
+	}
+	//checking if a parent exists.
+	if (target.getParent()[0] != null) {
+		userClasses.get(target.getParent()[0]).removeChild(targetClass);
+	}
+	userClasses.delete(targetClass);
+	return (targetClass + " has been deleted.");
+		
+}
+
+/**
  * Returns the array of children for a specific class block.
  * @param targetClass 
  */
 function getChildren(targetClass : string)
 {
-	var array = userClasses.get(targetClass).getChildren();
-	if(array.length <= 0) {
-		return ("This class has no children");
+	var temp = userClasses.get(targetClass).getChildren();
+	var children = new Array();
+    if(temp.length <= 0) {
+        return ("This class has no children");
 	}
-	return ("children: " + array);
+	for (var c in temp) {
+		children.push(temp[c][0]);
+	}
+    return ("children: " + children);
 }
 
 /**
  * Adds a child class to a specific class block.
  * @param targetClass 
  * @param childClass 
+ * @param relationship 
  */
-function addChild(targetClass : string, childClass : string)
+function addChild(targetClass : string, childClass : string, relationship : string)
 {
-	userClasses.get(targetClass).addChild(childClass);
-	userClasses.get(childClass).setParent(targetClass);
-	return ("added " + childClass + " as a child to " + targetClass + ".");
+    userClasses.get(targetClass).addChild(childClass, relationship);
+    userClasses.get(childClass).setParent(targetClass, relationship);
+    return ("added " + childClass + " as a child to " + targetClass + ".");
 }
 
 /**
@@ -678,11 +694,12 @@ function addChild(targetClass : string, childClass : string)
  */
 function deleteChild(targetClass : string, childClass : string)
 {
-	if((userClasses.get(targetClass).getChildren()).indexOf(childClass) > -1) {
+    if((userClasses.get(targetClass).getChildIndex(childClass)) > -1) {
 		userClasses.get(targetClass).removeChild(childClass);
-		return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
-	}
-	return (childClass + " is not a child of " + targetClass + ".");
+		userClasses.get(childClass).removeParent();
+        return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+    }
+    return (childClass + " is not a child of " + targetClass + ".");
 }
 
 /**
@@ -691,7 +708,7 @@ function deleteChild(targetClass : string, childClass : string)
  */
 function getParent(targetClass : string)
 {
-	if(userClasses.get(targetClass).getParent() == null) {
+	if(userClasses.get(targetClass).getParent()[0] == null) {
 		return ("There is no parent class for " + targetClass + ".");
 	}
 	return ("The parent of " + targetClass + " is " + userClasses.get(targetClass).getParent() + ".");
@@ -701,12 +718,13 @@ function getParent(targetClass : string)
  * Adds a parent to a specific class block.
  * @param targetClass 
  * @param parentClass 
+ * @param relationship 
  */
-function addParent(targetClass : string, parentClass : string)
+function addParent(targetClass : string, parentClass : string, relationship : string)
 {
-	userClasses.get(targetClass).setParent(parentClass);
-	userClasses.get(parentClass).addChild(targetClass);
-	return ("Added " + parentClass + " as the parent for " + targetClass);
+    userClasses.get(targetClass).setParent(parentClass, relationship);
+    userClasses.get(parentClass).addChild(targetClass, relationship);
+    return ("Added " + parentClass + " as the parent for " + targetClass);
 }
 
 /**
@@ -715,7 +733,10 @@ function addParent(targetClass : string, parentClass : string)
  */
 function removeParent(targetClass : string)
 {
+	var parent = userClasses.get(targetClass).getParent()[0];
+	userClasses.get(parent).removeChild(targetClass);
 	userClasses.get(targetClass).removeParent();
+
 	return ("Removed the parent of " + targetClass + ".");
 }
 /** rename (string, string) returns string
@@ -758,9 +779,9 @@ function loadFile() {
 			yaml[i][1]["funs"].forEach(function(j) {
 				userClasses.get(yaml[i][0]).setFun(j);
 			});
-			userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);
+			//userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);need to fix
 			yaml[i][1]["children"].forEach(function(j) {
-				userClasses.get(yaml[i][0]).addChild(j);
+				userClasses.get(yaml[i][0]).addChild(j[0], j[1]);
 			});
 		}
 	}

@@ -2,7 +2,7 @@ class classBlock {
 	private name : string;
 	private vars : string[] = new Array();
 	private funs : string[] = new Array();
-	private parent: string = null;
+	private parent = [null, null];
 	private children : string[][] = new Array();
 
 	constructor (name : string) {
@@ -26,8 +26,8 @@ class classBlock {
 				classOut += " " + i; 
 			});
 		}
-		if (this.parent != null) {
-			classOut += " Parent : " + this.parent;
+		if (this.parent[0] != null) {
+			classOut += " Parent : " + this.parent[0] + "(" + this.parent[1] + ")";
 		}
 		if (this.children.length > 0 ) {
 			classOut += " Children :";
@@ -83,6 +83,11 @@ class classBlock {
 		return true;
 	}
 
+	removeAllVar() {
+		this.vars = [];
+		return true;
+	}
+
 	/** setFun (string) returns bool
 	 * Creates a new function in a classBlock
 	**/
@@ -111,13 +116,20 @@ class classBlock {
 		return true;
 	}
 
+	removeAllFun() {
+		this.funs = [];
+		return true;
+	}
+
 	/**
 	 * Allows you to set the parent of the classblock.
 	 * @param parent 
+	 * @param relationship 
 	 */
-	setParent(parent: string)
+	setParent(parent: string, relationship: string)
 	{
-		this.parent = parent;
+		this.parent[0] = parent;
+		this.parent[1] = relationship;
 		return true;
 	}
 
@@ -126,7 +138,7 @@ class classBlock {
 	 */
 	removeParent()
 	{
-		this.parent = null;
+		this.parent = [null, null];
 		return true;
 	}
 

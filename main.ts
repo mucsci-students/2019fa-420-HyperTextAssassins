@@ -298,20 +298,33 @@ $(function() {
 		//Connects parents and children
 		if (parentDiv != undefined) {
 			let childName = prompt("Please enter the name of the new child block");
-
+			let rType = prompt("relationship type");//will switch to radio buttons
+			//temporary check
+			while(!(rType === "strong" || 
+					rType === "weak" || 
+					rType === "is-a" || 
+					rType === "impl")) {
+				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
+			}
 			if (childName == undefined || childName == null) {
 				alert("Please enter a valid child name");
 				return;
 			} else {
-				//create a block with that name and draw a line to it
-				addBlock(childName);
+				//create a block with that name and draw a line to it (if it doesnt exist already)
+				if (!userClasses.has(childName)) {
+					addBlock(childName);
+				}
 
 				//code to draw line
 				let childDiv =$('[name="' + childName + '"]');
-				var ep1 = jsPlumb.addEndpoint(childName),
-				ep2 = jsPlumb.addEndpoint(parentDiv);
+				var ep1 = jsPlumb.addEndpoint(name, {
+					connectorOverlays:[ 
+						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
+						[ "Label", { label:rType, id:"quantifier"} ]
+					],
+				  });
+			var ep2 = jsPlumb.addEndpoint(childName);
 				jsPlumb.connect({ source:ep1, target:ep2 });
-			//jsplumb code goes here, use childDiv and parentDiv to draw line to each other
 			}
 		} else {
 			alert("Cannot add a child to a class that doesn't exist");

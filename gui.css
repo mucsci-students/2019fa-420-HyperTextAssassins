@@ -25,7 +25,7 @@ body{
 	border-width: 1px;
 	border-color: black;
 	text-align: center;
-	position: relative;
+	position: absolute;
 	display: inline-block;
 	overflow: auto;
 	background-color: silver;
@@ -89,6 +89,15 @@ body{
 	margin: 0px;
 	float: left;
 	overflow: auto;
+}
+
+#renameClass {
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
 }
 
 #add{

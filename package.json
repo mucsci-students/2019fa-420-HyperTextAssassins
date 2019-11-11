@@ -18,5 +18,8 @@
         "karma-mocha": "^1.3.0",
         "mocha": "^6.2.2",
         "typescript": "^3.6.4"
+    },
+    "dependencies": {
+        "@types/jsplumb": "^2.5.7"
     }
 }

@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="gui.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="js-yaml.min.js"></script>
+		<script src="jsplumb.min.js"></script>
 		<script src="main.js"></script>
 
 	</head>
@@ -14,10 +15,19 @@
 
 		<div id = "page">
 			<div id = "toolbar">
-				<input type ="button" id = "add" value = "Add">  </button>
-				<input type ="button" id ="edit" value ="Edit"> </button>
+				<input type ="button" id = "add" value = "Add Class"> </button>
+				<input type ="button" id ="functionButton" value ="Add Functions"> </button>
+				<input type ="button" id ="variableButton" value ="Add Variables"> </button>
+				<input type ="button" id ="editClassInfo" value ="Edit functions /variables"> </button>
+				<input type ="button" id ="deleteClassInfo" value ="Delete functions /variables"> </button>
+				<input type ="button" id = "renameClass" value = "Rename Class"> </button>
+				<input type ="button" id ="child" value ="Add Child"> </button>
+				<input type ="button" id ="delete" value ="Delete Class"> </button>
 				<input type ="button" id ="save" value ="Save"> </button>
 				<input type ="button" id ="load" value ="Load"> </button>
+
+
+
 			</div>
 
 			<div id = "blockArea">

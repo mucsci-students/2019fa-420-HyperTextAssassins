@@ -3,7 +3,7 @@ class classBlock {
 	private vars : string[] = new Array();
 	private funs : string[] = new Array();
 	private parent: string = null;
-	private children : string[] = new Array();
+	private children : string[][] = new Array();
 
 	constructor (name : string) {
 		this.name = name;
@@ -32,7 +32,7 @@ class classBlock {
 		if (this.children.length > 0 ) {
 			classOut += " Children :";
 			this.children.forEach(function(i) {
-				classOut += " " + i;
+				classOut += " " + i[0] + "(" + i[1] + ")";
 			});
 		}
 		return classOut;
@@ -141,9 +141,9 @@ class classBlock {
 	 * Allows you to add a classblock to the children's array.
 	 * @param child 
 	 */
-	addChild(child: string)
+	addChild(child: string, relationship: string)
 	{
-		this.children.push(child);
+		this.children.push([child, relationship]);
 		return true;
 	}
 	/**
@@ -155,12 +155,28 @@ class classBlock {
 	}
 
 	/**
+	 * Returns the index of a child.
+	 * @param child 
+	 */
+	getChildIndex(child: string)
+	{
+		if (this.children.length < 1) {
+			return -1;
+		}
+		for (var c in this.children) {
+			if (this.children[c][0] === child) {
+				return c
+			}
+		}
+	}
+
+	/**
 	 * Removes a specific child from the childrens array.
 	 * @param child 
 	 */
 	removeChild(child: string)
 	{
-		var index = this.children.indexOf(child);
+		var index = this.children.indexOf([child]);
 		this.children.splice(index, 1);
 		return true;
 	}

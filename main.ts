@@ -350,6 +350,7 @@ $(function() {
 		//find div based on name and remove the entire classblock, including all child elements
 		if (userClasses.get(name)){
 			if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + name)[1]){
+				jsPlumb.remove(name);
 				$('[name="' + name + '"]').remove();
 			}
 		} else {

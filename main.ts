@@ -14,9 +14,6 @@ $(function() {
 	command.focus();
 
 	//do on event
-
-	
-
 	function addBlock(name : string, load: boolean = false) {
 		//check for whitespace in name
 		if (name.indexOf(" ") > 0) {
@@ -60,112 +57,196 @@ $(function() {
         addBlock(name);
 	});
 
+	/*
+	* This function deletes info inside of the classblocks
+	*It is used for deleting functions and variables
+	*/
+	$("#deleteClassInfo").click(function() {
+		let name = prompt("Please enter the name of the class you would like to delete functions/variables from", "Class");
+		let className = $('[name="' + name + '"]');
+		let delOption = prompt("would you like to delete a function or an variable? Type 'variable' or 'function' without quotes");
+		delOption = delOption.toLowerCase().trim();
+
+		//If the user wants to delete a variable
+		if (delOption == 'variable') {
+			let delVar : string = prompt("What is the name of the variable you'd like to delete? ");
+			delVar = delVar.toLowerCase().trim();
+
+			/*
+			for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
+			deLAttr, the html <li> element is removed
+			checks the <li> tag up to but not including the first [. Then removes the html element if it's not found
+			also needs to pass doCommand
+			*/
+			$('[name="' + name + '"] .variables').children().each(function() {
+				let editVariable : Array<string> = $(this).text().split("]");
+				console.log(editVariable[0]);
+				console.log(editVariable[1]);
+				if(editVariable[1] === delVar
+					&& doCommand("delvar " + name + " " + delVar)[1]) {
+					$(this).remove();
+				}
+			});
+
+		//If the user wants to delete a function
+		} else if (delOption == "function"){
+
+			
+			//Get the name of function that the user wants to delete
+			let delFun : string = prompt("What is the name of the function you'd like to delete?");
+			delFun = delFun.toLowerCase().trim();
+
+			//Finds the object inside of the correct classblock using 'name' and .functions
+			$('[name="' + name + '"] .functions').children().each(function() {
+				//need to parse the string correctly, remove the return type, and then the parameters to check
+				console.log("did a thing");
+				let deleteText : string = $(this).text();
+				let newString : string  = deleteText.substr(deleteText.indexOf(" ") + 1, deleteText.length);
+				let check : string = newString.substr(0, newString.indexOf("("));
+				console.log(check);
+
+				//check is just the function name with nothing else, so just check if it matches the user input delFun
+				if(check.toLowerCase().trim() === delFun 
+					&& doCommand("delfun " + name + " " + check)[1]) {
+					$(this).remove();
+				}
+			});
+		}
+	});
 
 	//controls editing the class blocks
-	$("#edit").click(function() {
+	//handles editing variables/functions
+	$("#editClassInfo").click(function() {
 		let name = prompt("Please enter the name of the class you would like to edit", "Class");
 		let className = $('[name="' + name + '"]');
 
-		//check for editing a class that doesn't exist
+		//Won't let the user edit a class that doesn't exist
 		if(name == null) {
 			return;
 		} else if(className.attr('name') == undefined) {
 			alert("Cannot edit nonexistent class");
 			return;
 		}
-
-		let option : string = prompt("Would you like to delete or edit an existing variable or function? type 'delete' or 'edit' without quotes");
-
-		//case for deleteing variables and functions
-		if(option.toLowerCase().trim() == "delete") {
-			let delOption = prompt("would you like to delete a function or an variable? Type 'variable' or 'function' without quotes");
-			delOption = delOption.toLowerCase().trim();
-
-			//deleting a variable
-			if (delOption == 'variable') {
-				let delAttr : string = prompt("What is the name of the variable you'd like to delete? ");
-				delAttr = delAttr.toLowerCase().trim();
-
-				/*for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
-					deLAttr, the html <li> element is removed
-					checks the <li> tag up to but not including the first [. Then removes the html element if it's not found
-					also needs to pass doCommand*/
-
-				$('[name="' + name + '"] .variables').children().each(function() {
-					if($(this).text().substr(0, $(this).text().indexOf('[')) === delAttr 
-						&& doCommand("delvar " + name + " " + delAttr)[1]) {
-						$(this).remove();
-					}
-				});
-
-			//same idea for function
-			//FOR PARAMETERS: probably need to just check til the first (, then delete it if thats found
-			} else if (delOption == "function"){
-				let delFun : string = prompt("What is the name of the function you'd like to delete?");
-				delFun = delFun.toLowerCase().trim();
-				//need a string for () to find in gui, and then normal for doCommand
-
-				//finds the correct li with the correct function
-				
-
-				$('[name="' + name + '"] .functions').children().each(function() {
-					//need to parse the string correctly, remove the return type, and then the parameters to check
-					console.log("did a thing");
-					let deleteText : string = $(this).text();
-					let newString : string  = deleteText.substr(deleteText.indexOf(" ") + 1, deleteText.length);
-					let check : string = newString.substr(0, newString.indexOf("("));
-					console.log(check);
-					//check is just the function name with nothing else, so just check if it matches the user input delFun
-					if(check.toLowerCase().trim() === delFun 
-						&& doCommand("delfun " + name + " " + check)[1]) {
-						$(this).remove();
-					}
-				});
-			}
 		
-			
-		//handles editing variables/functions
-		} else if (option.toLowerCase().trim() == "edit"){
-			let editOption = prompt("would you like to edit a function or an variable? Type 'variable' or 'function' without quotes");
+		//Picks which if statement to jump too based off which option the user enters
+		let editOption = prompt("would you like to edit a function or an variable? Type 'variable' or 'function' without quotes");
+		
+		//Handles editing variables
+		if (editOption == "variable") {
+			let itemToEdit : string = prompt ("What is the name of the variable you want to edit?")
+			let whatToEdit : string = prompt("Would you like to edit the name, the type or both? (Please enter 'name' or 'type'");
 
-			if (editOption == "variable") {
-				let itemToEdit : string = prompt("What is the name of the variable you'd like to edit? ");
-				let newName : string = prompt("What would you like to rename it to? (Put 'yes' after the new name if you'd like to edit the type as well)");
-				
-				//find the correct variable, use indexOf ot get string without the type at the end. Check if it equals user input
+			//If the user wants to edit the name of the variable
+			if(whatToEdit == "name"){
+				let newName : string = prompt("What would you like to rename it to?");
 				$('[name="' + name + '"] .variables').children().each(function() {
-					let editVariable : Array<string> = $(this).text().split("[");
-					if(editVariable[0] == itemToEdit) {
 
-						$(this).html(newName + "<strong>[" + editVariable[1] + "</strong>");
+					//Splits the variable and variable type into two separate strings
+					let editVariable : Array<string> = $(this).text().split("]");
+					if(editVariable[1] == itemToEdit) {
+						editVariable[1] = newName;
+						console.log(editVariable[0]);
+						console.log(editVariable[1]);
+
+						//Updates the page to display the new variable name
+						$(this).html("<strong>" + editVariable[0] + "]</strong>" + newName);
 					}
 				});
 
-			} else if (editOption == "function"){
-				let itemToEdit = prompt("What is the name of the function you'd like to edit?");
-				let newName = prompt("What would you like to rename it to? (Don't include parentheses)");
+			//If the user wants to edit the type of the variable
+			} else if(whatToEdit == "type"){
 
+				//Gets name of the variable the user wants to edit
+				let newType = prompt("What is the new type of this variable?")
+				$('[name="' + name + '"] .variables').children().each(function() {
+					//Splits the variable and variable type into two separate strings
+					let editVariable : Array<string> = $(this).text().split("]");
+					if(editVariable[1] == itemToEdit) {
+
+						//Updates page to display new variable type
+						$(this).html("<strong>[" + newType +  "]</strong>" + editVariable[1]);
+					}
+				});
+
+			}
+			
+				
+			//find the correct variable, use indexOf ot get string without the type at the end. Check if it equals user input
+			
+		//Handles editing functions
+		} else if (editOption == "function"){
+			//Gets the name of the function the user wants to edit, checks if it actually exists before proceeding
+			let itemToEdit = prompt("What is the name of the function you'd like to edit?");
+			if ($('[name="' + name + '"] .functions').children() == undefined){
+				prompt("Cannot edit a function that doesn't exist")
+			} else {
+			//Figures out what the user is trying to edit
+			let whatToEdit : string = prompt("Would you like to edit the name, the return type or the parameters? (Please enter 'name', 'type' or 'parameters' ");
+
+			//If the user wants to edit the name of their function
+			if (whatToEdit == "name"){
+
+				//Gets the name name for the function from the user
+				let newName : string = prompt("What would you like to rename it to? (Don't include parentheses)");
+
+				//Goes inside the right classblock and finds the function div to edit the correct function
 				$('[name="' + name + '"] .functions').children().each(function() {
 					let editFunction : Array<string> = $(this).text().split(" ");
-
+	
 					if(editFunction[1] === itemToEdit) {
 						editFunction[1] = newName;
+						$(this).html("<i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>" + editFunction[2] + "</strong>");
+					}
+				});
+
+			//Handles editing types of functions
+			} else if(whatToEdit == "type"){
+				let newType : string = prompt("What is the new return type for this function?")
+				$('[name="' + name + '"] .functions').children().each(function() {
+					let editFunction : Array<string> = $(this).text().split(" ");
+	
+					if(editFunction[1] === itemToEdit) {
+						editFunction[0] = newType;
+						//Updates the html to show the new return type for the function
 						$(this).html("<li><i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>" + editFunction[2] + "</strong> </li>");
 					}
 				});
+
+			//Handles editing the parameters of a function
+			} else if(whatToEdit == "parameters"){
+				let newParams : string = prompt("What are the new parameters for this function? (Enter without spaces, ex: 'interest,rate,balance')")
+				$('[name="' + name + '"] .functions').children().each(function() {
+					let editFunction : Array<string> = $(this).text().split(" ");	
+					if(editFunction[1] === itemToEdit) {
+
+						//Updates the parameters to contain the newly specified parameters
+						editFunction[2] = newParams;
+
+						//Updates the html to display the new parameters
+						$(this).html("<li><i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>(" + editFunction[2] + ")</strong> </li>");
+					}
+				});
 			}
+
 		}
-		
+
+			
+		}	
 	});
 
+	//Used to rename Classes while maintaining their position and info in the map
 	$("#renameClass").click(function(){
-        let oldName : string = prompt("What is the name of the class you want to rename?")
-        if(userClasses.get(oldName)){
-            let newName : string = prompt("What would you like to rename it to?");
-            userClasses.get(oldName).setName(newName);
+		let oldName : string = prompt("What is the name of the class you want to rename?")
+        if(userClasses.get(oldName)){ //Checks to make sure the name to change actually exists in the map
+			let newName : string = prompt("What would you like to rename it to?");
+			
+			//Updates the old name to the new name
+			userClasses.get(oldName).setName(newName);
+			//Sets the new name equal to all of the old information
             userClasses.set(newName, userClasses.get(oldName));
             $('[name="' + oldName + '"] strong').text(newName);
-            $('[name="' + oldName + '"]').attr("name", newName);
+			$('[name="' + oldName + '"]').attr("name", newName);
+			//Deletes the old name so it can be reused
             userClasses.delete(oldName);
             
         } else {
@@ -201,12 +282,13 @@ $(function() {
 			return;
 		}
 
+		//Ensures the classname exists
 		if (className != undefined){
 			let input : string = prompt("Please enter the function you'd like to add to " + name);
 			let parameters : string = prompt("Please enter the parameters separated by a comma (no spaces between them");
 			let returnType : string = prompt("What is the return type?");
 
-			//check for a blank entry, just default to void return type
+			//check for a blank entry, and defaults to void return type
 			if (returnType.trim() == undefined || returnType.trim() == "") {
 				returnType = "void";
 			}
@@ -226,6 +308,7 @@ $(function() {
 		}
 	}
 
+	//Handles adding functions to classes
 	$("#functionButton").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to add a function to", "Class");
 		if (name == null) {
@@ -252,20 +335,14 @@ $(function() {
 		if (className != undefined){
 			let input : string = prompt("Please enter the variable you would like to add to " + name);
 			let type : string = prompt("What is the type of this variable?");
-			
-			/*let inputSplit : Array<string> = input.split(" ");
-			inputSplit.forEach(function(variable) {
-				
-			});*/
 
 
 			//basically, checks for the div with that name and then appends to it. It will always append to the
 			//correct div because the name is tied to each div uniquely.
 			//add each of the elements based on the split user input
-
 			if (input && type && doCommand("addvar " + className + " " + type + " " + input)[1]) {
 				//this setup lets us find the exact div to add based on the HTML 'name' tag.
-				$('[name="' + className + '"] .variables').append("<li>" + "<strong>&lt;" + type + "&gt;</strong>" + input + "</li>");
+				$('[name="' + className + '"] .variables').append("<li>" + "<strong>[" + type + "]</strong>" + input + "</li>");
 			} else {
 				alert("Please enter a valid variable name/type")
 			}
@@ -276,15 +353,14 @@ $(function() {
 		}
 	}
 
+	//Handles adding variables to classblocks
 	$("#variableButton").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to add a variable to");
 		if(name == null || name == undefined) {
 			return;
 		} else {
 			addVariable(name);
-		}
-		
-		
+		}	
 	});
 
 
@@ -307,6 +383,7 @@ $(function() {
 					rType === "impl")) {
 				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
 			}
+			//Ensures you enter a name for the child
 			if (childName == undefined || childName == null) {
 				alert("Please enter a valid child name");
 				return;
@@ -366,46 +443,8 @@ $(function() {
 	});
 
 
-
-
-/*
-	//function for dragging
-	$(document).ready(function() {
-    var $dragging = null;
-    $('#blockArea').on("mousedown", "div", function(e) {
-		$(this).attr('unselectable', 'on').addClass('draggable');
-        var el_w = $('.draggable').outerWidth(),
-			el_h = $('.draggable').outerHeight();
-			
-        $('#blockArea').on("mousemove", function(e) {
-            if ($dragging) {
-                $dragging.offset({
-                    top: e.pageY - el_h / 2,
-                    left: e.pageX - el_w / 2
-
-                });
-            }
-
-        });
-        $dragging = $(e.target);
-    }).on("mouseup", ".draggable", function(e) {
-    	if($dragging.position().left <= 0 || $(this).position().top <= 0) {
-    		$dragging.offset({
-    			top: 40,
-    			left:100
-    		});
-	    }
-
-		$dragging = null;
-        $(this).removeAttr('unselectable').removeClass('draggable');
-	});
-	
-	
-}); */
-
-
-	//dragging
-	//FIX tomorrow
+	//Handles the dragging of classblocks
+	//Allows classblocks to be dragged
 	$('#blockArea').on("mousedown", ".classblock", function(e) {
 		dragBlock();
 	});

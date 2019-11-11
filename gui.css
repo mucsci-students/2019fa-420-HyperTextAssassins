@@ -28,7 +28,7 @@ body{
 	position: absolute;
 	display: inline-block;
 	overflow: auto;
-	background-color: silver;
+	background-color: lightgrey;
 	user-select: none;
 }
 
@@ -49,11 +49,11 @@ body{
 }
 
 .classblock .functions strong {
-	color: green;
+	color: navy;
 }
 
 .classblock .functions li i {
-	color: yellow;
+	color: red;
 }
 
 
@@ -110,13 +110,22 @@ body{
 
 }
 
-#edit {
+#editClassInfo {
 	width: 90%;
 	margin: 5%;
 	height: 50px;
 	margin-bottom: 25px;
 	cursor: pointer;
-	
+	white-space: normal;
+}
+
+#deleteClassInfo{
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
 }
 
 #save{
@@ -176,7 +185,7 @@ body{
 	width: calc(100% - 90px);
 	height: 100vh;
 	float: left;
-	background-color: gray;
+	background-color: grey;
 	overflow: hidden;
 }
 

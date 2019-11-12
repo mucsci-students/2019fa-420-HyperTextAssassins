@@ -1,45 +1,103 @@
+html{
+	margin: 0;
+	background-color: gray;
+}
+
 body{
-	width: 100vh;
+	width: 100vw;
 	height: 100vh;
 	margin: 0;
 }
 
 #page{
-	width: 1200px;
-	height: 1200px;
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
 }
 
-
 .classblock{
-	width: 150px;
-	height: 250px;
+	min-width: 150px;
+	width: auto;
+	height: auto;
+	min-height: 250px;
 	margin: 10px;
 	border-style: solid;
 	border-width: 1px;
 	border-color: black;
 	text-align: center;
-	position: relative;
+	position: absolute;
 	display: inline-block;
 	overflow: auto;
-	background-color: silver;
+	background-color: lightgrey;
+	user-select: none;
+}
+
+.classblock .variables {
+	pointer-events: none;
+}
+
+.classblock .functions {
+	pointer-events: none;
+}
+
+.classblock strong {
+	pointer-events: none;
+}
+
+.classblock .variables strong {
+	color: red;
+}
+
+.classblock .functions strong {
+	color: navy;
+}
+
+.classblock .functions li i {
+	color: red;
 }
 
 
-.child{
+.variables{
+	border-bottom: solid;
+	border-width: 1px;
+	height: auto;
+	width: auto;
+	min-height: 100px;
+	min-width: 100px;
+
+}
+
+.functions{
+	height: auto;
+	width: auto;
+	min-height: 100px;
+	min-width: 100px;
+
+}
+
+
+.child {
 	background-color: green;
 	position: relative;
 	text-align: center;
 }
 
 #toolbar{
-	border-right: 2px;	
-	height: 100%;
-	width: 50px;
+	width: 90px;
+	height: 100vh;
 	background-color: silver;
 	margin: 0px;
-	margin-right: 5px;
 	float: left;
 	overflow: auto;
+}
+
+#renameClass {
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
 }
 
 #add{
@@ -47,18 +105,27 @@ body{
 	width: 90%;
 	margin: 5%;
 	margin-bottom: 25px;
-	padding: 50px 50px;
 	cursor: pointer;
+	white-space: normal;
 
 }
 
-#edit {
+#editClassInfo {
 	width: 90%;
 	margin: 5%;
 	height: 50px;
 	margin-bottom: 25px;
 	cursor: pointer;
-	
+	white-space: normal;
+}
+
+#deleteClassInfo{
+	width: 90%;
+	margin: 5%;
+	height: 50px;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
 }
 
 #save{
@@ -77,13 +144,49 @@ body{
 	cursor: pointer;
 }
 
-#blockArea{
-	width: 1100px;
-	height: 1200px;
-	float: left;
-	background-color: gray;
-	overflow: auto;
+#functionButton{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+	
+}
 
+#variableButton{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+
+#child{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+
+#delete{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+
+#blockArea{
+	width: calc(100% - 90px);
+	height: 100vh;
+	float: left;
+	background-color: grey;
+	overflow: hidden;
 }
 
 .dropdown{

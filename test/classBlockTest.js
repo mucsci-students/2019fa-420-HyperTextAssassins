@@ -12,8 +12,7 @@ describe('classBlock Tests', function(){
 
     it('set var', function(){
         const block = new classBlock('myName');
-        block.setVar('myVar');
-        assert.equal(block.isVar('myVar'), true);
+        assert.equal(block.setVar('myType', 'myVar'), true);
     });
 
     it('set fun', function(){
@@ -34,10 +33,10 @@ describe('classBlock Tests', function(){
         assert.equal(block.setFun('myFun'), false);
     });
 
-    it('.print() of a block with vars but no funs should return \'Class : myName Variables : myVar\'', function(){
+    it('.print() of a block with vars but no funs should return \'Class : myName Variables : <myType> myVar\'', function(){
         const block = new classBlock('myName');
-        block.setVar('myVar');
-        assert.equal(block.print(), 'Class : myName Variables : myVar');
+        block.setVar('myType', 'myVar');
+        assert.equal(block.print(), 'Class : myName Variables : <myType> myVar');
     });
 
     it('.print() of a block with funs but no vars should return \'Class : myName Functions : myFun\'', function(){
@@ -46,11 +45,11 @@ describe('classBlock Tests', function(){
         assert.equal(block.print(), 'Class : myName Functions : myFun');
     });
 
-    it('.print() should return \'Class : myName Variables : myVar Functions : myFun\'', function(){
+    it('.print() should return \'Class : myName Variables : <myType> myVar Functions : myFun\'', function(){
         const block = new classBlock('myName');
-        block.setVar('myVar');
+        block.setVar('myType', 'myVar');
         block.setFun('myFun');
-        assert.equal(block.print(), 'Class : myName Variables : myVar Functions : myFun');
+        assert.equal(block.print(), 'Class : myName Variables : <myType> myVar Functions : myFun');
     });
 
 });

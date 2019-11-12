@@ -1,6 +1,8 @@
 /// <reference path="classBlock.ts" />
 
 let userClasses = new Map<string, classBlock>();
+let command : JQuery = $("#command");
+
 
 $(function() {
 	//vars
@@ -12,127 +14,504 @@ $(function() {
 	command.focus();
 
 	//do on event
-
-	//Button left hand side
-	$("#add").click(function(){
-
-		//get name from user and then check if the div exists
-		let name = prompt("Please enter class name", "Class");
-		let className = $('[name="' + name + '"]').attr('name');
-
-		//if the name is found, className won't be undefined, so we know the
-		//class name already exists
-		if (className != undefined) {
-			alert("Please enter a unique class name");
+	function addBlock(name : string, load: boolean = false) {
+		//check for whitespace in name
+		if (name.indexOf(" ") > 0) {
+			alert("Please enter Class name without spaces");
 			return;
-		} 
-
-		//check if the name is null
-
-		if (name && doCommand("create " + name)[1]) {
-		$("#blockArea").append("<div class= \"classblock\" name =" + name + "> <form> <select class =\"dropdown\" draggable = \"false\" name =" + name + 
-			" onchange=\"dropDownClick(this.name, this.value);this.value = 'Select an option...';\"> <option value =\"delete \" selected>Delete class</option> <option value = \"attribute \" selected>Add attribute</option> <option value = \"child \" selected>Add child <option value = \"function \" selected>Add function</option><option value=\"Select an option...\" selected>Select an option... </select> </form>" + name +  "</div>");
-		
 		}
 
+        let className : string = $('[name="' + name + '"]').attr('name');
 
+        //if the name is found, className won't be undefined, so we know the
+        //class name already exists
+        if (className != undefined) {
+            alert("Please enter a unique class name");
+            return;
+        }
+
+        name = name.replace(/<\/?[^>]+(>|$)/g, "");
+
+        //same code below but needed to bypass doCommand check when loading file 
+        //(other wise create will return false on load)
+        if (load == true) {
+          $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <strong>" + name + "</strong>"+  "</div>");
+
+			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
+			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
+        }
+
+        //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
+        //The appended html adds the visual class block element to the #blockArea.
+        if (name && doCommand("create " + name)[1]) {
+			$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
+			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
+			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
+        }
+    }
+
+    //click event for adding a class block
+	$("#add").click(function(){
+		//get name from user and then check if the div exists
+        let name : string = prompt("Please enter class name", "Class");
+        addBlock(name);
+	});
+
+	/*
+	* This function deletes info inside of the classblocks
+	*It is used for deleting functions and variables
+	*/
+	$("#deleteClassInfo").click(function() {
+		let name = prompt("Please enter the name of the class you would like to delete functions/variables from", "Class");
+		let className = $('[name="' + name + '"]');
+		let delOption = prompt("would you like to delete a function or an variable? Type 'variable' or 'function' without quotes");
+		delOption = delOption.toLowerCase().trim();
+
+		//If the user wants to delete a variable
+		if (delOption == 'variable') {
+			let delVar : string = prompt("What is the name of the variable you'd like to delete? ");
+			delVar = delVar.toLowerCase().trim();
+
+			/*
+			for each loop on all child elements within the classBlock. If the text in the <li> is the same as 
+			deLAttr, the html <li> element is removed
+			checks the <li> tag up to but not including the first [. Then removes the html element if it's not found
+			also needs to pass doCommand
+			*/
+			$('[name="' + name + '"] .variables').children().each(function() {
+				let editVariable : Array<string> = $(this).text().split("]");
+				console.log(editVariable[0]);
+				console.log(editVariable[1]);
+				if(editVariable[1] === delVar
+					&& doCommand("delvar " + name + " " + delVar)[1]) {
+					$(this).remove();
+				}
+			});
+
+		//If the user wants to delete a function
+		} else if (delOption == "function"){
+
+			
+			//Get the name of function that the user wants to delete
+			let delFun : string = prompt("What is the name of the function you'd like to delete?");
+			delFun = delFun.toLowerCase().trim();
+
+			//Finds the object inside of the correct classblock using 'name' and .functions
+			$('[name="' + name + '"] .functions').children().each(function() {
+				//need to parse the string correctly, remove the return type, and then the parameters to check
+				console.log("did a thing");
+				let deleteText : string = $(this).text();
+				let newString : string  = deleteText.substr(deleteText.indexOf(" ") + 1, deleteText.length);
+				let check : string = newString.substr(0, newString.indexOf("("));
+				console.log(check);
+
+				//check is just the function name with nothing else, so just check if it matches the user input delFun
+				if(check.toLowerCase().trim() === delFun 
+					&& doCommand("delfun " + name + " " + check)[1]) {
+					$(this).remove();
+				}
+			});
+		}
 	});
 
 	//controls editing the class blocks
-	$("#edit").click(function() {
+	//handles editing variables/functions
+	$("#editClassInfo").click(function() {
 		let name = prompt("Please enter the name of the class you would like to edit", "Class");
 		let className = $('[name="' + name + '"]');
 
+		//Won't let the user edit a class that doesn't exist
 		if(name == null) {
 			return;
 		} else if(className.attr('name') == undefined) {
 			alert("Cannot edit nonexistent class");
 			return;
 		}
-
-		let option = prompt("Would you like to delete or edit an existing attribute or function? type 'delete' or 'edit' without quotes");
-		//handles deleting attributes
-		if(option.toLowerCase().trim() == "delete"){
-			let item = prompt("What is the name of the attribute/function you'd like to delete? ");
-			item = item.toLowerCase().trim();
-
-			$('[name="' + name + '"]').children().each(function() {
-				if($(this).text() === item && doCommand("delvar " + name + " " + item)[1]) {
-					$(this).remove();
-				} else if($(this).text().slice(-2) === "()" && doCommand("delfun " + name + " " + item)[1]) {
-					$(this).remove();
-				}
-				
-			});
 		
+		//Picks which if statement to jump too based off which option the user enters
+		let editOption = prompt("would you like to edit a function or an variable? Type 'variable' or 'function' without quotes");
+		
+		//Handles editing variables
+		if (editOption == "variable") {
+			let itemToEdit : string = prompt ("What is the name of the variable you want to edit?")
+			let whatToEdit : string = prompt("Would you like to edit the name, the type or both? (Please enter 'name' or 'type'");
+
+			//If the user wants to edit the name of the variable
+			if(whatToEdit == "name"){
+				let newName : string = prompt("What would you like to rename it to?");
+				$('[name="' + name + '"] .variables').children().each(function() {
+
+					//Splits the variable and variable type into two separate strings
+					let editVariable : Array<string> = $(this).text().split("]");
+					if(editVariable[1] == itemToEdit) {
+						editVariable[1] = newName;
+						console.log(editVariable[0]);
+						console.log(editVariable[1]);
+
+						//Updates the page to display the new variable name
+						$(this).html("<strong>" + editVariable[0] + "]</strong>" + newName);
+					}
+				});
+
+			//If the user wants to edit the type of the variable
+			} else if(whatToEdit == "type"){
+
+				//Gets name of the variable the user wants to edit
+				let newType = prompt("What is the new type of this variable?")
+				$('[name="' + name + '"] .variables').children().each(function() {
+					//Splits the variable and variable type into two separate strings
+					let editVariable : Array<string> = $(this).text().split("]");
+					if(editVariable[1] == itemToEdit) {
+
+						//Updates page to display new variable type
+						$(this).html("<strong>[" + newType +  "]</strong>" + editVariable[1]);
+					}
+				});
+
+			}
 			
-		//handles editing attributes/functions
-		} else if (option.toLowerCase().trim() == "edit"){
-			let itemToEdit = prompt("What is the name of the attribute/function you'd like to edit? ");
-			let newName = prompt("What would you like to rename it too? ");
-			itemToEdit = itemToEdit.toLowerCase().trim();
+				
+			//find the correct variable, use indexOf ot get string without the type at the end. Check if it equals user input
 			
-			$('[name="' + name + '"]').children().each(function() {
-				if($(this).text() === itemToEdit) {
-					$(this).text(newName);
-				}
-			});
+		//Handles editing functions
+		} else if (editOption == "function"){
+			//Gets the name of the function the user wants to edit, checks if it actually exists before proceeding
+			let itemToEdit = prompt("What is the name of the function you'd like to edit?");
+			if ($('[name="' + name + '"] .functions').children() == undefined){
+				prompt("Cannot edit a function that doesn't exist")
+			} else {
+			//Figures out what the user is trying to edit
+			let whatToEdit : string = prompt("Would you like to edit the name, the return type or the parameters? (Please enter 'name', 'type' or 'parameters' ");
+
+			//If the user wants to edit the name of their function
+			if (whatToEdit == "name"){
+
+				//Gets the name name for the function from the user
+				let newName : string = prompt("What would you like to rename it to? (Don't include parentheses)");
+
+				//Goes inside the right classblock and finds the function div to edit the correct function
+				$('[name="' + name + '"] .functions').children().each(function() {
+					let editFunction : Array<string> = $(this).text().split(" ");
+	
+					if(editFunction[1] === itemToEdit) {
+						editFunction[1] = newName;
+						$(this).html("<i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>" + editFunction[2] + "</strong>");
+					}
+				});
+
+			//Handles editing types of functions
+			} else if(whatToEdit == "type"){
+				let newType : string = prompt("What is the new return type for this function?")
+				$('[name="' + name + '"] .functions').children().each(function() {
+					let editFunction : Array<string> = $(this).text().split(" ");
+	
+					if(editFunction[1] === itemToEdit) {
+						editFunction[0] = newType;
+						//Updates the html to show the new return type for the function
+						$(this).html("<li><i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>" + editFunction[2] + "</strong> </li>");
+					}
+				});
+
+			//Handles editing the parameters of a function
+			} else if(whatToEdit == "parameters"){
+				let newParams : string = prompt("What are the new parameters for this function? (Enter without spaces, ex: 'interest,rate,balance')")
+				$('[name="' + name + '"] .functions').children().each(function() {
+					let editFunction : Array<string> = $(this).text().split(" ");	
+					if(editFunction[1] === itemToEdit) {
+
+						//Updates the parameters to contain the newly specified parameters
+						editFunction[2] = newParams;
+
+						//Updates the html to display the new parameters
+						$(this).html("<li><i>" + editFunction[0] + "</i> " + editFunction[1] + " <strong>(" + editFunction[2] + ")</strong> </li>");
+					}
+				});
+			}
 
 		}
+
+			
+		}	
 	});
 
+	//Used to rename Classes while maintaining their position and info in the map
+	$("#renameClass").click(function(){
+		let oldName : string = prompt("What is the name of the class you want to rename?")
+        if(userClasses.get(oldName)){ //Checks to make sure the name to change actually exists in the map
+			let newName : string = prompt("What would you like to rename it to?");
+			
+			//Updates the old name to the new name
+			userClasses.get(oldName).setName(newName);
+			//Sets the new name equal to all of the old information
+            userClasses.set(newName, userClasses.get(oldName));
+            $('[name="' + oldName + '"] strong').text(newName);
+			$('[name="' + oldName + '"]').attr("name", newName);
+			//Deletes the old name so it can be reused
+            userClasses.delete(oldName);
+            
+        } else {
+            alert("You can't rename classes that don't exist");
+        }
+    });
+
+
+	//save button in GUI calls backend for saving file
 	$("#save").click(function() {
 		doCommand("save");
 	});
 
+	//loads UML diagram into backend and GUI from an already saved yaml file
 	$("#load").click(function() {
-		doCommand("load");
+        doCommand("load");
+	});
+
+
+
+
+
+
+	/*
+	 * Adds a function to the class block. Optional parameters are used only for loading
+	 */
+	function addFunction(name : string, input?: string, load: boolean = false){
+		let className = $('[name="' + name + '"]').attr('name');
+
+		//used only if loading to bypass prompt and doCommand check
+		if (load == true) {
+			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
+			return;
+		}
+
+		//Ensures the classname exists
+		if (className != undefined){
+			let input : string = prompt("Please enter the function you'd like to add to " + name);
+			let parameters : string = prompt("Please enter the parameters separated by a comma (no spaces between them");
+			let returnType : string = prompt("What is the return type?");
+
+			//check for a blank entry, and defaults to void return type
+			if (returnType.trim() == undefined || returnType.trim() == "") {
+				returnType = "void";
+			}
+
+			let inputSplit : Array<string> = input.split(" ");
+
+			//basically, checks for the div with that name and then appends to it. It will always append to the
+			//correct div because the name is tied to each div uniquely.
+			inputSplit.forEach(function(fun) {
+			if (fun && doCommand("addfun " + className + " " + fun)[1]) {
+				$('[name="' + className + '"] .functions').append("<li><i>" + returnType + "</i> " + fun + " (<strong>" + parameters + "</strong>) </li>");
+			}
+		});
+
+		} else {
+			alert("Cannot add functions to a class that doesn't exist");
+		}
+	}
+
+	//Handles adding functions to classes
+	$("#functionButton").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to add a function to", "Class");
+		if (name == null) {
+			return;
+		}
+		addFunction(name);
+	});
+
+
+	/*
+	 * Adds a variable to the class block both in the GUI and backend representation. Has optional parameters
+	 * for loading explained below
+	 */
+	function addVariable(name : string, input?: string[], load: boolean = false) {
+		let className : string = $('[name="' + name + '"]').attr('name');
+
+		//uses optional parameters to bypass both the user input prompt with the input?: parameter, and doCommand check
+		//with the load parameter
+		if(load == true) {
+			$('[name="' + className + '"] .variables').append("<li>" + "<strong>&lt;" + input[0] + "&gt;</strong>" + input[1] + "</li>");
+			return;
+		}
+
+		if (className != undefined){
+			let input : string = prompt("Please enter the variable you would like to add to " + name);
+			let type : string = prompt("What is the type of this variable?");
+
+
+			//basically, checks for the div with that name and then appends to it. It will always append to the
+			//correct div because the name is tied to each div uniquely.
+			//add each of the elements based on the split user input
+			if (input && type && doCommand("addvar " + className + " " + type + " " + input)[1]) {
+				//this setup lets us find the exact div to add based on the HTML 'name' tag.
+				$('[name="' + className + '"] .variables').append("<li>" + "<strong>[" + type + "]</strong>" + input + "</li>");
+			} else {
+				alert("Please enter a valid variable name/type")
+			}
+
+
+		} else {
+			alert("Cannot add variable. Class \"" + name + "\" doesn't exist");
+		}
+	}
+
+	//Handles adding variables to classblocks
+	$("#variableButton").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to add a variable to");
+		if(name == null || name == undefined) {
+			return;
+		} else {
+			addVariable(name);
+		}	
+	});
+
+
+
+
+
+	//used click event for addChild in GUI, also can be called by backend
+	function addChild(name : string) {
+		let parentDiv = $('[name="' + name + '"]').attr("name");
+		
+		//prevents connecting to an undefined/null classblock
+		//Connects parents and children
+		if (parentDiv != undefined) {
+			let childName = prompt("Please enter the name of the new child block");
+			let rType = prompt("relationship type");//will switch to radio buttons
+			//temporary check
+			while(!(rType === "strong" || 
+					rType === "weak" || 
+					rType === "is-a" || 
+					rType === "impl")) {
+				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
+			}
+			//Ensures you enter a name for the child
+			if (childName == undefined || childName == null) {
+				alert("Please enter a valid child name");
+				return;
+			} else {
+				//create a block with that name and draw a line to it (if it doesnt exist already)
+				if (!userClasses.has(childName)) {
+					addBlock(childName);
+				}
+
+				//code to draw line
+				let childDiv =$('[name="' + childName + '"]');
+				var ep1 = jsPlumb.addEndpoint(name, {
+					connectorOverlays:[ 
+						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
+						[ "Label", { label:rType, id:"quantifier"} ]
+					],
+				  });
+			var ep2 = jsPlumb.addEndpoint(childName);
+				jsPlumb.connect({ source:ep1, target:ep2 });
+			}
+		} else {
+			alert("Cannot add a child to a class that doesn't exist");
+		}
+	}
+
+	//click function for child. uses a prompt in the GUI
+	$("#child").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
+		addChild(name);
 		
 	});
 
 
 
-	//dragging
-	$(document).ready(function() {
-    var $dragging = null;
-    $('#blockArea').on("mousedown", "div", function(e) {
-		$(this).attr('unselectable', 'on').addClass('draggable');
-        var el_w = $('.draggable').outerWidth(),
-			el_h = $('.draggable').outerHeight();
-			
-        $('#blockArea').on("mousemove", function(e) {
-            if ($dragging) {
-                $dragging.offset({
-                    top: e.pageY - el_h / 2,
-                    left: e.pageX - el_w / 2
-                });
-            }
-        });
-        $dragging = $(e.target);
-    }).on("mouseup", ".draggable", function(e) {
-		$dragging = null;
-        $(this).removeAttr('unselectable').removeClass('draggable');
+
+
+	//deletes class both in the GUI and backend
+	function deleteClass(name : string){
+		let classToDelete = $('[name="' + name + '"]');
+
+		//find div based on name and remove the entire classblock, including all child elements
+		if (userClasses.get(name)){
+			if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + name)[1]){
+				jsPlumb.remove(name);
+				$('[name="' + name + '"]').remove();
+			}
+		} else {
+			alert("Class \"" + name + "\" does not exist, please enter a valid class name");
+		}
+	}
+
+	//calls deleteClass() when GUI button is clicked
+	$("#delete").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to delete");
+		deleteClass(name);
+		
 	});
-	
-	
-});​ 
 
 
+	//Handles the dragging of classblocks
+	//Allows classblocks to be dragged
+	$('#blockArea').on("mousedown", ".classblock", function(e) {
+		dragBlock();
+	});
+
+	function dragBlock() {
+		let classBlock = jsPlumb.getInstance();
+		classBlock.draggable($(".classblock"), {
+				containment: true,
+        		drag:function() {
+				//need to repaint everything so the relationship lines follow.
+				jsPlumb.repaintEverything();
+			}
+		});
+	}
+
+
+
 	
-	
+	//need to sleep while user selects file
+	const sleep = (milliseconds) => {
+ 		return new Promise(resolve => setTimeout(resolve, milliseconds))
+	}
 
 	/** Listens to inputFile and loads a file selected from windows prompt
 	 * Basically a way to seperate selecting a file from actually loading it
+	 * also does loading in the GUI. needs to be put here due to synchinpmng issues 
 	**/
-	$("#inputFile").on("change", function () {loadFile();});
+	$("#inputFile").on("change", function () {
+		loadFile();
+
+		//does the actual loading in the GUI
+		if($("#blockArea") != undefined) {
+			//clear block area for loading
+			$("#blockArea").html("");
+
+			sleep(500).then(() => {
+				//turn the userClasses map into an array and iterate through it
+				for (let key of Array.from(userClasses.keys())) {
+
+            	    addBlock(key, true);
+
+            	    //get variables and functions into arrays based on the key value in the map
+	                let variables = userClasses.get(key).getVars();
+    	            let functions = userClasses.get(key).getFun();
+    				
+    				//loop through each array and add them to the corresponding classblock
+        	        variables.forEach(function (value) {
+            	    	addVariable(key, value, true);
+                	});
+
+                	functions.forEach(function (value) {
+               	    	addFunction(key, value, true);
+               	 	});
+            	}
+            });
+		}
+	});
+
 
 	//runs every time a key is pressed when #command is in focus
 	command.on('keypress', function(e) {
 		//checks if enter key is pressed
 		if(e.which === 13) {
-			if (command.val() == "clear")
+			if (command.val() == "clear") {
 				log.val("");
-			else if (command.val() == "")
+				command.val("");
+			} else if (command.val() == "")
 				apdLog("", log);
 			else {
 				apdLog(">" + command.val(), log);
@@ -143,64 +522,6 @@ $(function() {
 		}
 	});
 });
-
-//called functions
-
-
-function dropDownClick(className, option){
-
-	if (option == "Select an option...")
-	{
-		//Do NOTHING
-	}
-
-	if (option === "function ") {
-		let input = prompt("Please enter the " + option + "to add")
-
-		//basically, checks for the div with that name and then appends to it. It will always append to the
-		//correct div because the name is tied to each div uniquely.
-		//backend done
-		if (input && doCommand("addfun " + className + " " + input)[1]) {
-			$('[name="' + className + '"]').append("<li>" + input + "()</li>");
-		}
-		
-	} else if (option === "child ") {
-		//same idea as adding a class block to see if it already exists
-		let connectParent = prompt("Please enter the name of the parent to connect to");
-		let className = $('[name="' + connectParent + '"]').attr('name');
-		
-		//prevents connecting to an undefined/null classblock
-		//Connects parents and children
-		if (className == undefined) {
-			alert("Class name currently does not exist");
-			return;
-		} else if (className == null) {
-			return;
-		} else {
-			//TODO
-			//Run code to connect arrows, relationship
-		}
-
-
-		//backend done
-	} else if (option === "delete ") {
-		//find div based on name and remove
-		if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + className)[1]){
-			$('[name="' + className + '"]').remove();
-		}
-		else {
-			return;
-		}
-	//backend done	
-	} else if (option === "attribute ") {
-		let input = prompt("Please enter the " + option + "to add")
-		if (input && doCommand("addvar " + className + " " + input)[1]) {
-			$('[name="' + className + '"]').append("<li>" + input + "</li>");
-		}
-		
-	}
-}
-
 
 /** help (string)
  * is called when user gives an arguement to the help command
@@ -222,8 +543,12 @@ function help(cmd : string) {
 			 + " Creates a block";
 
 		case "addvar":
-			return ">addvar <targetclass> <var>\n"
+			return ">addvar <targetclass> <type> <var>\n"
 			 + " Adds a variable to target class";
+
+		case "editvartype":
+			return ">editvartype <targetclass> <newtype> <targetvar>\n"
+			 + " Changes the type of the target variable";
 
 		case "delvar":
 			return ">delvar <targetclass> <var>\n"
@@ -260,41 +585,30 @@ function help(cmd : string) {
 		case "load":
 			return ">load\n"
 			 + " Loads diagram from loaded .yml file";
-
-		case "loadfile":
-			return ">loadfile\n"
-			 + " Reveals a button that prompts for a file";
-		break;
 		
 		case "removeparent":
 			return ">removeparent\n"
 			 + " Removes the parent of a classblock." 
-		break;
 			
 		case "addparent":
 			return ">addparent\n"
 			 + " Adds a parent to a classblock."
-		break;
 			
 		case "getparent":
 			return ">getparent\n"
 			 + " Returns the parent of a classblock."
-		break;
 			
 		case "deletechild":
 			return ">deletechild\n"
 			 + " Removes a specific child from a classblock."
-		break;
 			
 		case "getchildren":
 			return ">getchildren\n"
 			 + " Returns all of the children for a classblock."
-		break;
 			
 		case "addchild":
 			return ">addchild\n"
 			 + " Adds a child to a classblock."
-		break;
 
 		default:
 			return cmd + " is not a command"
@@ -320,12 +634,13 @@ function doCommand(command : string) {
 				return["list of commands\n"
 						+ ">clear\n"
 						+ ">create\n"
-						+ ">addvar\n"
-						+ ">delvar\n"
-						+ ">addfun\n"
-						+ ">delfun\n"
 						+ ">delete\n"
 						+ ">rename\n"
+						+ ">addvar\n"
+						+ ">delvar\n"
+						+ ">editvartype\n"
+						+ ">addfun\n"
+						+ ">delfun\n"
 						+ ">print\n"
 						+ ">printall\n"
 						+ ">save\n"
@@ -353,10 +668,23 @@ function doCommand(command : string) {
 
 		case "addvar":
 			if (userClasses.has(args[1])) {
-				if (userClasses.get(args[1]).setVar(args[2])) {
-					return ["Var " + args[2] + " added to " + args[1], true];
+				if (args.length < 4 || args[3] == "") { 
+					return ["Please enter a target class, type, and name after addvar, type <help> <addvar> for more info", false];
+				} else if (userClasses.get(args[1]).setVar(args[2], args[3])) {
+					return ["Var <" + args[2] + "> " + args[3] +" added to " + args[1], true];
 				} else {
-					return ["Var " + args[2] + " already exists in " + args[1], false];
+					return ["Var " + args[3] + " already exists in " + args[1], false];
+				}
+			} else {
+				return [args[1] + " class does not exist", false];
+			}
+
+		case "editvartype":
+			if (userClasses.has(args[1])) {
+				if (args.length < 4 || args[3] == "") { 
+					return ["Please enter a target class, new type, and variable after editvartype, type <help> <editvartype> for more info", false];
+				} else if (userClasses.get(args[1]).editVar(args[2], args[3])) {
+					return ["Var " + args[3] + " is now type <" + args[2] + "> in " + args[1], true];
 				}
 			} else {
 				return [args[1] + " class does not exist", false];
@@ -583,7 +911,7 @@ function rename (oldName : string, newName : string) {
 function loadFile() {
 	// Grabs the file selected from the file input button.
 	//var File = (<HTMLInputElement>document.getElementById("inputFile")).files[0];
-
+	
 	let inputFile = $("#inputFile");
 
 	var file : File = inputFile.prop('files')[0];
@@ -597,7 +925,7 @@ function loadFile() {
 		for (let i : number = 0; i < yaml.length; i++) {
 			userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
 			yaml[i][1]["vars"].forEach(function(j) {
-				userClasses.get(yaml[i][0]).setVar(j);
+				userClasses.get(yaml[i][0]).setVar(j[0], j[1]);
 			});
 			yaml[i][1]["funs"].forEach(function(j) {
 				userClasses.get(yaml[i][0]).setFun(j);
@@ -608,6 +936,7 @@ function loadFile() {
 			});
 		}
 	}
+
 	fileReader.readAsText(file, "UTF-8");
 
 }

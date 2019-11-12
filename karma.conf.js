@@ -6,13 +6,24 @@ module.exports = function (config) {
             'main.js',
             'test/*.js'
         ],
-        reporters: ['progress'],
+        reporters: ['progress', 'coverage'],
+        preprocessors: {
+            'main.js': ['coverage']
+        },
         port: 9876,  // karma web server port
         colors: true,
         logLevel: config.LOG_INFO,
         browsers: ['Firefox'],
         autoWatch: false,
         concurrency: Infinity,
+        coverageReporter: {
+            includeAllSources: true,
+            dir: 'coverage/',
+            reporters: [
+                { type: "html", subdir: "html" },
+                { type: 'text-summary' }
+            ]
+        },
         customLaunchers: {
             FirefoxHeadless: {
                 base: 'Firefox',

@@ -265,11 +265,6 @@ $(function() {
         doCommand("load");
 	});
 
-
-
-
-
-
 	/*
 	 * Adds a function to the class block. Optional parameters are used only for loading
 	 */
@@ -317,7 +312,6 @@ $(function() {
 		addFunction(name);
 	});
 
-
 	/*
 	 * Adds a variable to the class block both in the GUI and backend representation. Has optional parameters
 	 * for loading explained below
@@ -362,10 +356,6 @@ $(function() {
 			addVariable(name);
 		}	
 	});
-
-
-
-
 
 	//used click event for addChild in GUI, also can be called by backend
 	function addChild(name : string) {
@@ -583,27 +573,27 @@ function help(cmd : string) {
 			 + " Loads diagram from loaded .yml file";
 		
 		case "removeparent":
-			return ">removeparent\n"
+			return ">removeparent <targetclass>\n"
 			 + " Removes the parent of a classblock." 
 			
 		case "addparent":
-			return ">addparent\n"
+			return ">addparent <targetclass> <parentclass> <relationship>\n"
 			 + " Adds a parent to a classblock."
 			
 		case "getparent":
-			return ">getparent\n"
+			return ">getparent <targetclass>\n"
 			 + " Returns the parent of a classblock."
 			
 		case "deletechild":
-			return ">deletechild\n"
+			return ">deletechild <targetclass> <childclass>\n"
 			 + " Removes a specific child from a classblock."
 			
 		case "getchildren":
-			return ">getchildren\n"
+			return ">getchildren <targetclass>\n"
 			 + " Returns all of the children for a classblock."
 			
 		case "addchild":
-			return ">addchild\n"
+			return ">addchild <targetclass> <childclass> <relationship>\n"
 			 + " Adds a child to a classblock."
 
 		default:
@@ -641,6 +631,12 @@ function doCommand(command : string) {
 						+ ">printall\n"
 						+ ">save\n"
 						+ ">load\n"
+						+ ">addchild\n"
+						+ ">deletechild\n"
+						+ ">getchildren\n"
+						+ ">addparent\n"
+						+ ">getparent\n"
+						+ ">removeparent\n"
 						+ "type >help <command> for instructions on that command", true];
 			}
 
@@ -655,11 +651,12 @@ function doCommand(command : string) {
 			}
 
 		case "delete":
-			if (userClasses.has(args[1])) {
-				userClasses.delete(args[1]);
-				return [args[1] + " deleted", true];
-			} else {
+			if (args.length != 2) {
+				return ["Please use this format: >delete <targetclass>", false];
+			} else if (!userClasses.has(args[1])) {
 				return [args[1] + " class does not exist", false];
+			} else {
+				return [deleteClassBlock(args[1]), true];
 			}
 
 		case "addvar":
@@ -756,8 +753,8 @@ function doCommand(command : string) {
 			return ["Loading", true]
 
 		case "addparent":
-			if (args.length != 3) {
-				return ["format: >addparent <targetclass> <parentclass>", false];
+			if (args.length != 4) {
+				return ["format: >addparent <targetclass> <parentclass> <relationship>", false];
 			} else if (!userClasses.has(args[1])) {
 				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
@@ -830,6 +827,7 @@ function deleteClassBlock(targetClass : string)
 		//Based on their relationship with the classblack we are deleting.
 		target.getChildren().forEach(child => {
 			var c = userClasses.get(child[0]);
+			c.removeParent();
 			if (child[1] === "strong") {
 				userClasses.delete(child[0]);
 			} else if (child[1] === "is-a") {
@@ -839,7 +837,6 @@ function deleteClassBlock(targetClass : string)
 			} else if (child[1] === "impl") {
 				//TODO
 			}
-			c.removeParent();
 		});
 	}
 	//checking if a parent exists.

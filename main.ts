@@ -873,8 +873,13 @@ function getChildren(targetClass : string)
  */
 function addChild(targetClass : string, childClass : string, relationship : string)
 {
-    userClasses.get(targetClass).addChild(childClass, relationship);
-    userClasses.get(childClass).setParent(targetClass, relationship);
+	var target = userClasses.get(targetClass);
+	var child = userClasses.get(childClass);
+	if (target.getParent()[0] === childClass) {
+		return (targetClass + " is already a child of " + childClass);
+	}
+    target.addChild(childClass, relationship);
+    child.setParent(targetClass, relationship);
     return ("added " + childClass + " as a child to " + targetClass + ".");
 }
 
@@ -913,8 +918,13 @@ function getParent(targetClass : string)
  */
 function addParent(targetClass : string, parentClass : string, relationship : string)
 {
-    userClasses.get(targetClass).setParent(parentClass, relationship);
-    userClasses.get(parentClass).addChild(targetClass, relationship);
+	var target = userClasses.get(targetClass);
+	var parent = userClasses.get(parentClass);
+	if (parent.getParent()[0] === targetClass) {
+		return (targetClass + " is already the parent of " + parentClass);
+	}
+    target.setParent(parentClass, relationship);
+    parent.addChild(targetClass, relationship);
     return ("Added " + parentClass + " as the parent for " + targetClass);
 }
 

@@ -394,14 +394,13 @@ $(function() {
 				}
 
 				//code to draw line
-				let childDiv =$('[name="' + childName + '"]');
 				var ep1 = jsPlumb.addEndpoint(name, {
 					connectorOverlays:[ 
 						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
 						[ "Label", { label:rType, id:"quantifier"} ]
 					],
 				  });
-			var ep2 = jsPlumb.addEndpoint(childName);
+				var ep2 = jsPlumb.addEndpoint(childName);
 				jsPlumb.connect({ source:ep1, target:ep2 });
 			}
 		} else {
@@ -416,17 +415,14 @@ $(function() {
 		
 	});
 
-
-
-
-
 	//deletes class both in the GUI and backend
 	function deleteClass(name : string){
 		let classToDelete = $('[name="' + name + '"]');
 
 		//find div based on name and remove the entire classblock, including all child elements
 		if (userClasses.get(name)){
-			if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + name)[1]){
+			if(confirm("Are you sure you want to delete this class?") && doCommand("delete " + name)[1])
+			{
 				jsPlumb.remove(name);
 				$('[name="' + name + '"]').remove();
 			}
@@ -748,7 +744,7 @@ function doCommand(command : string) {
 			} else if (!userClasses.has(args[1])) {
 				return [args[1] + " does not exist", false];
 			}
-			return [rename(args[1], args[2]), true];
+		return [rename(args[1], args[2]), true];
 
 
 		case "save":
@@ -766,9 +762,9 @@ function doCommand(command : string) {
 				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
 				return [args[2] + " does not exist", false];
-			}
-			return [addParent(args[1], args[2]), true];
-		
+			}				
+			return [addParent(args[1], args[2], args[3]), true];
+			
 		case "getparent": 
 			if (args.length != 2) {
 				return ["format: >getparent <targetclass>", false];
@@ -776,7 +772,7 @@ function doCommand(command : string) {
 				return [args[1] + " does not exist", false];
 			}
 			return [getParent(args[1]), true];
-
+	
 		case "removeparent":
 			if (args.length != 2) {
 				return ["format: >removeparent <targetclass>", false];
@@ -784,17 +780,17 @@ function doCommand(command : string) {
 				return [args[1] + " does not exist", false];
 			}
 			return [removeParent(args[1]), true];
-
+	
 		case "addchild":
-			if (args.length < 3) {
-				return ["format: >addchild <targetclass> <childclass>", false];
+			if (args.length != 4) {
+				return ["format: >addchild <targetclass> <childclass> <relationship>", false];
 			} else if (!userClasses.has(args[1])) {
 				return [args[1] + " does not exist", false];
 			} else if (!userClasses.has(args[2])) {
 				return [args[2] + " does not exist", false];
 			}
-			return [addChild(args[1], args[2]), true];
-
+			return [addChild(args[1], args[2], args[3]), true];
+	
 		case "getchildren":
 			if (args.length != 2) {
 				return ["format: >getchildren <targetclass>", false];
@@ -802,7 +798,7 @@ function doCommand(command : string) {
 				return [args[1] + " does not exist", false];
 			}
 			return [getChildren(args[1]), true];
-
+	
 		case "deletechild":
 			if (args.length != 3) {
 				return ["format: >getchildren <targetclass>", false];
@@ -817,6 +813,43 @@ function doCommand(command : string) {
 			return [args[0] + " is not a command", false];
 	}
 }
+/* Called Functions */
+
+/**
+ * Function for deleting a classblock.
+ * Needs to check if the classblock has children,
+ * 	if so it will delete accordingly based on their relationship.
+ * @param targetClass 
+ */
+function deleteClassBlock(targetClass : string)
+{
+	var target = userClasses.get(targetClass);
+	//checking for children.
+	if (target.getChildren().length > 0) {
+		//Runs through each child and performs the correct action.
+		//Based on their relationship with the classblack we are deleting.
+		target.getChildren().forEach(child => {
+			var c = userClasses.get(child[0]);
+			if (child[1] === "strong") {
+				userClasses.delete(child[0]);
+			} else if (child[1] === "is-a") {
+				//remove all vars/func
+				c.removeAllFun();
+				c.removeAllVar();
+			} else if (child[1] === "impl") {
+				//TODO
+			}
+			c.removeParent();
+		});
+	}
+	//checking if a parent exists.
+	if (target.getParent()[0] != null) {
+		userClasses.get(target.getParent()[0]).removeChild(targetClass);
+	}
+	userClasses.delete(targetClass);
+	return (targetClass + " has been deleted.");
+		
+}
 
 /**
  * Returns the array of children for a specific class block.
@@ -824,23 +857,28 @@ function doCommand(command : string) {
  */
 function getChildren(targetClass : string)
 {
-	var array = userClasses.get(targetClass).getChildren();
-	if(array.length <= 0) {
-		return ("This class has no children");
+	var temp = userClasses.get(targetClass).getChildren();
+	var children = new Array();
+    if(temp.length <= 0) {
+        return ("This class has no children");
 	}
-	return ("children: " + array);
+	for (var c in temp) {
+		children.push(temp[c][0]);
+	}
+    return ("children: " + children);
 }
 
 /**
  * Adds a child class to a specific class block.
  * @param targetClass 
  * @param childClass 
+ * @param relationship 
  */
-function addChild(targetClass : string, childClass : string)
+function addChild(targetClass : string, childClass : string, relationship : string)
 {
-	userClasses.get(targetClass).addChild(childClass);
-	userClasses.get(childClass).setParent(targetClass);
-	return ("added " + childClass + " as a child to " + targetClass + ".");
+    userClasses.get(targetClass).addChild(childClass, relationship);
+    userClasses.get(childClass).setParent(targetClass, relationship);
+    return ("added " + childClass + " as a child to " + targetClass + ".");
 }
 
 /**
@@ -850,11 +888,12 @@ function addChild(targetClass : string, childClass : string)
  */
 function deleteChild(targetClass : string, childClass : string)
 {
-	if((userClasses.get(targetClass).getChildren()).indexOf(childClass) > -1) {
+    if((userClasses.get(targetClass).getChildIndex(childClass)) > -1) {
 		userClasses.get(targetClass).removeChild(childClass);
-		return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
-	}
-	return (childClass + " is not a child of " + targetClass + ".");
+		userClasses.get(childClass).removeParent();
+        return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
+    }
+    return (childClass + " is not a child of " + targetClass + ".");
 }
 
 /**
@@ -863,7 +902,7 @@ function deleteChild(targetClass : string, childClass : string)
  */
 function getParent(targetClass : string)
 {
-	if(userClasses.get(targetClass).getParent() == null) {
+	if(userClasses.get(targetClass).getParent()[0] == null) {
 		return ("There is no parent class for " + targetClass + ".");
 	}
 	return ("The parent of " + targetClass + " is " + userClasses.get(targetClass).getParent() + ".");
@@ -873,12 +912,13 @@ function getParent(targetClass : string)
  * Adds a parent to a specific class block.
  * @param targetClass 
  * @param parentClass 
+ * @param relationship 
  */
-function addParent(targetClass : string, parentClass : string)
+function addParent(targetClass : string, parentClass : string, relationship : string)
 {
-	userClasses.get(targetClass).setParent(parentClass);
-	userClasses.get(parentClass).addChild(targetClass);
-	return ("Added " + parentClass + " as the parent for " + targetClass);
+    userClasses.get(targetClass).setParent(parentClass, relationship);
+    userClasses.get(parentClass).addChild(targetClass, relationship);
+    return ("Added " + parentClass + " as the parent for " + targetClass);
 }
 
 /**
@@ -887,9 +927,13 @@ function addParent(targetClass : string, parentClass : string)
  */
 function removeParent(targetClass : string)
 {
+	var parent = userClasses.get(targetClass).getParent()[0];
+	userClasses.get(parent).removeChild(targetClass);
 	userClasses.get(targetClass).removeParent();
+
 	return ("Removed the parent of " + targetClass + ".");
 }
+
 /** rename (string, string) returns string
  * Renames a class
 **/
@@ -930,9 +974,9 @@ function loadFile() {
 			yaml[i][1]["funs"].forEach(function(j) {
 				userClasses.get(yaml[i][0]).setFun(j);
 			});
-			userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);
+			//userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);// need to fix
 			yaml[i][1]["children"].forEach(function(j) {
-				userClasses.get(yaml[i][0]).addChild(j);
+				userClasses.get(yaml[i][0]).addChild(j[0], j[1]);
 			});
 		}
 	}

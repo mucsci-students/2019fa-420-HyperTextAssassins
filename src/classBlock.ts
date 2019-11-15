@@ -1,4 +1,4 @@
-class classBlock {
+export class classBlock {
 	private name : string;
 	private vars : string[][] = new Array();
 	private funs : string[] = new Array();

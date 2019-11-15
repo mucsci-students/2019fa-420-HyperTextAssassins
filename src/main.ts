@@ -1,4 +1,6 @@
-/// <reference path="classBlock.ts" />
+import { classBlock } from './classBlock'
+import * as jsyaml from 'js-yaml'
+import * as jsPlumb from '../dist/jsPlumb.min.js'
 
 let userClasses = new Map<string, classBlock>();
 let command : JQuery = $("#command");
@@ -919,7 +921,8 @@ function loadFile() {
 	// Using a FileReader to read the contents of the file as regular text.
 	var fileReader : FileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
-		var textFromFile = fileLoadedEvent.target.result;
+		//var textFromFile = fileLoadedEvent.target.result;
+		var textFromFile = fileReader.result;
 		userClasses.clear();
 		let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
 		for (let i : number = 0; i < yaml.length; i++) {

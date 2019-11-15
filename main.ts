@@ -269,7 +269,6 @@ $(function() {
 
 
 
-
 	/*
 	 * Adds a function to the class block. Optional parameters are used only for loading
 	 */
@@ -411,6 +410,18 @@ $(function() {
 
 	//click function for child. uses a prompt in the GUI
 	$("#child").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
+		addChild(name);
+		
+	});
+
+	$("#addRelationship").click(function() {
+		let name = prompt("Please enter the name of the classes you'd like to add a relationship between (Please enter the parent first, followed by a space and then the child)");
+		addChild(name);
+		
+	});
+
+	$("#deleteRelationshipp").click(function() {
 		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
 		addChild(name);
 		

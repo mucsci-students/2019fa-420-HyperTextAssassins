@@ -110,6 +110,26 @@ body{
 
 }
 
+#addRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+
+}
+
+#deleteRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+
+}
+
 #editClassInfo {
 	width: 90%;
 	margin: 5%;

@@ -405,6 +405,21 @@ $(function() {
 		
 	});
 
+
+
+	$("#addRelationship").click(function() {
+		let name = prompt("Please enter the name of the classes you'd like to add a relationship between (Please enter the parent first, followed by a space and then the child)");
+		addChild(name);
+		
+	});
+
+	$("#deleteRelationshipp").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
+		addChild(name);
+		
+	});
+
+
 	//deletes class both in the GUI and backend
 	function deleteClass(name : string){
 		let classToDelete = $('[name="' + name + '"]');

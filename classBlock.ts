@@ -2,8 +2,8 @@ class classBlock {
 	private name : string;
 	private vars : string[][] = new Array();
 	private funs : string[] = new Array();
-	private parent: string = null;
-	private children : string[] = new Array();
+	private parent = [null, null];
+	private children : string[][] = new Array();
 
 	constructor (name : string) {
 		this.name = name;
@@ -26,13 +26,13 @@ class classBlock {
 				classOut += " " + i; 
 			});
 		}
-		if (this.parent != null) {
-			classOut += " Parent : " + this.parent;
+		if (this.parent[0] != null) {
+			classOut += " Parent : " + this.parent[0] + "(" + this.parent[1] + ")";
 		}
 		if (this.children.length > 0 ) {
 			classOut += " Children :";
 			this.children.forEach(function(i) {
-				classOut += " " + i;
+				classOut += " " + i[0] + "(" + i[1] + ")";
 			});
 		}
 		return classOut;
@@ -95,6 +95,14 @@ class classBlock {
 		return true;
 	}
 
+	/**
+	 * Removes all variables in a classblock.
+	 */
+	removeAllVar() {
+		this.vars = [];
+		return true;
+	}
+
 	/** setFun (string) returns bool
 	 * Creates a new function in a classBlock
 	**/
@@ -131,15 +139,25 @@ class classBlock {
     getVars()
     {
         return this.vars;
-    }
+	}
+	
+	/**
+	 * Removes all functions in a classblock
+	 */
+	removeAllFun() {
+		this.funs = [];
+		return true;
+	}
 
 	/**
 	 * Allows you to set the parent of the classblock.
 	 * @param parent 
+	 * @param relationship 
 	 */
-	setParent(parent: string)
+	setParent(parent: string, relationship: string)
 	{
-		this.parent = parent;
+		this.parent[0] = parent;
+		this.parent[1] = relationship;
 		return true;
 	}
 
@@ -148,7 +166,7 @@ class classBlock {
 	 */
 	removeParent()
 	{
-		this.parent = null;
+		this.parent = [null, null];
 		return true;
 	}
 
@@ -163,9 +181,9 @@ class classBlock {
 	 * Allows you to add a classblock to the children's array.
 	 * @param child 
 	 */
-	addChild(child: string)
+	addChild(child: string, relationship: string)
 	{
-		this.children.push(child);
+		this.children.push([child, relationship]);
 		return true;
 	}
 	/**
@@ -177,12 +195,28 @@ class classBlock {
 	}
 
 	/**
+	 * Returns the index of a child.
+	 * @param child 
+	 */
+	getChildIndex(child: string)
+	{
+		if (this.children.length < 1) {
+			return -1;
+		}
+		for (var c in this.children) {
+			if (this.children[c][0] === child) {
+				return c
+			}
+		}
+	}
+
+	/**
 	 * Removes a specific child from the childrens array.
 	 * @param child 
 	 */
 	removeChild(child: string)
 	{
-		var index = this.children.indexOf(child);
+		var index = this.children.indexOf([child]);
 		this.children.splice(index, 1);
 		return true;
 	}

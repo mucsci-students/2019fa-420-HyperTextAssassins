@@ -155,7 +155,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " class does not exist", false];
                 } else {
-                    return [deleteClassBlock(args[1]), true];
+                    return [this.deleteClassBlock(args[1]), true];
                 }
 
             case "addvar":
@@ -259,7 +259,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[2])) {
                     return [args[2] + " does not exist", false];
                 }				
-                return [addParent(args[1], args[2], args[3]), true];
+                return [this.addParent(args[1], args[2], args[3]), true];
                 
             case "getparent": 
                 if (args.length != 2) {
@@ -267,7 +267,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 }
-                return [getParent(args[1]), true];
+                return [this.getParent(args[1]), true];
         
             case "removeparent":
                 if (args.length != 2) {
@@ -275,7 +275,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 }
-                return [removeParent(args[1]), true];
+                return [this.removeParent(args[1]), true];
         
             case "addchild":
                 if (args.length != 4) {
@@ -285,7 +285,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[2])) {
                     return [args[2] + " does not exist", false];
                 }
-                return [addChild(args[1], args[2], args[3]), true];
+                return [this.addChild(args[1], args[2], args[3]), true];
         
             case "getchildren":
                 if (args.length != 2) {
@@ -293,7 +293,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 }
-                return [getChildren(args[1]), true];
+                return [this.getChildren(args[1]), true];
         
             case "deletechild":
                 if (args.length != 3) {
@@ -303,7 +303,7 @@ export class backEnd {
                 } else if (!this.userClasses.has(args[2])) {
                     return [args[2] + " does not exist", false];
                 }
-                return [deleteChild(args[1], args[2]), true];
+                return [this.deleteChild(args[1], args[2]), true];
 
             default:
                 return [args[0] + " is not a command", false];

@@ -139,7 +139,10 @@ export class classBlock {
 	 * @param relationship 
 	 */
 	setParent(parent: string, relationship: string)
-	{
+	{	
+		if(this.parent[0] === parent) {
+			return false;
+		}
 		this.parent[0] = parent;
 		this.parent[1] = relationship;
 		return true;
@@ -201,6 +204,9 @@ export class classBlock {
 	removeChild(child: string)
 	{
 		var index = this.children.indexOf([child]);
+		if (index < 0) {
+			return false;
+		}
 		this.children.splice(index, 1);
 		return true;
 	}

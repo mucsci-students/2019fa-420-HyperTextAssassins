@@ -2,7 +2,7 @@ export class classBlock {
 	private name : string;
 	private vars : string[][] = new Array();
 	private funs : string[] = new Array();
-	public parent = [null, null];
+	private parent = [null, null];
 	private children : string[][] = new Array();
 
 	constructor (name : string) {
@@ -139,10 +139,7 @@ export class classBlock {
 	 * @param relationship 
 	 */
 	setParent(parent: string, relationship: string)
-	{	
-		if(this.parent[0] === parent) {
-			return false;
-		}
+	{
 		this.parent[0] = parent;
 		this.parent[1] = relationship;
 		return true;
@@ -200,15 +197,28 @@ export class classBlock {
 	}
 
 	/**
+	 * Returns the index of a child.
+	 * @param child 
+	 */
+	getChildIndex(child: string)
+	{
+		if (this.children.length < 1) {
+			return -1;
+		}
+		for (var c in this.children) {
+			if (this.children[c][0] === child) {
+				return c
+			}
+		}
+	}
+
+	/**
 	 * Removes a specific child from the childrens array.
 	 * @param child 
 	 */
 	removeChild(child: string)
 	{
 		var index = this.children.indexOf([child]);
-		if (index < 0) {
-			return false;
-		}
 		this.children.splice(index, 1);
 		return true;
 	}

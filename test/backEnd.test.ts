@@ -66,4 +66,5 @@ describe('backEnd Tests', function () {
         back.doCommand('addchild class2 class1 strong')
         expect(back.doCommand('deletechild class2 class1')).toContain("Removed class1 from the children's array of class2.")
     });
+
 });

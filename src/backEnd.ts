@@ -94,7 +94,8 @@ export class backEnd {
             case "addchild":
                 return ">addchild <targetclass> <childclass> <relationship>\n"
                     + " Adds a child to a classblock."
-
+            case "modrel":
+                return ">modrel <parentclass> <childclass> <relationship>"
             default:
                 return cmd + " is not a command"
         }
@@ -135,7 +136,10 @@ export class backEnd {
 						+ ">getchildren\n"
 						+ ">addparent\n"
 						+ ">getparent\n"
-						+ ">removeparent\n"
+
+                        + ">removeparent\n"
+                        + ">modrel\n"
+
                         + "type >help <command> for instructions on that command", true];
                 }
 
@@ -297,13 +301,28 @@ export class backEnd {
         
             case "deletechild":
                 if (args.length != 3) {
-                    return ["format: >getchildren <targetclass>", false];
+                    return ["format: >deletechild <targetclass> <childclass>", false];
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 } else if (!this.userClasses.has(args[2])) {
                     return [args[2] + " does not exist", false];
                 }
                 return [this.deleteChild(args[1], args[2]), true];
+
+            case "modrel":
+                if (args.length != 4) {
+                    return ["format: >modrel <targetclass> <childclass> <relationship>", false];
+                } else if (!this.userClasses.has(args[1])) {
+                    return [args[1] + " does not exist", false];
+                } else if (!this.userClasses.has(args[2])) {
+                    return [args[2] + " does not exist", false];
+                } else if (!(args[3] === "strong" || 
+                        args[3] === "weak" || 
+                        args[3] === "is-a" || 
+                        args[3] === "impl")) {
+                        return [args[3] + " is not a valid relationship", false];
+                    }
+                return [this.modifyRelationship(args[1], args[2], args[3]), true];
 
             default:
                 return [args[0] + " is not a command", false];
@@ -425,26 +444,29 @@ export class backEnd {
 	    this.userClasses.get(parent).removeChild(targetClass);
 	    this.userClasses.get(targetClass).removeParent();
 
-	return ("Removed the parent of " + targetClass + ".");
+
+	    return ("Removed the parent of " + targetClass + ".");
     }
-	
+
     /**
      * The ability to change an existing type of relationship
-     * @param targetClass 
-     * @param childClass 
-     * @param relationship 
+     *  E.g. change from strong to weak.
+     * @param parentClass 
+     * @param childClass  
+     * @param relationship
      */
-    modifyRelationship(targetClass: string, childClass: string, relationship: string) {
-        var target = this.userClasses.get(targetClass);
+    modifyRelationship(parentClass: string, childClass: string, relationship: string) {
+        var target = this.userClasses.get(parentClass);
         var child = this.userClasses.get(childClass);
         var children = target.getChildren();
         var index = target.getChildIndex(childClass);
-        if (children.length < index) {
+        if (index < 0) {
             return false;
         }
         children[index][1] = relationship;
         child.getParent()[1] = relationship;
-        return ("Changed the relationship of " + targetClass + " and " + childClass + " to " + relationship + ".");
+
+        return ("Changed the relationship of " + parentClass + " and " + childClass + " to " + relationship + ".");
     }
 
     /** rename (string, string) returns string

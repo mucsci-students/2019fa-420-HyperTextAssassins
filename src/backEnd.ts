@@ -72,29 +72,30 @@ export class backEnd {
                     + " Loads diagram from loaded .yml file";
 
             case "removeparent":
-                return ">removeparent\n"
-                    + " Removes the parent of a classblock."
-
+                return ">removeparent <targetclass>\n"
+                    + " Removes the parent of a classblock." 
+                    
             case "addparent":
-                return ">addparent\n"
+                return ">addparent <targetclass> <parentclass> <relationship>\n"
                     + " Adds a parent to a classblock."
-
+                    
             case "getparent":
-                return ">getparent\n"
+                return ">getparent <targetclass>\n"
                     + " Returns the parent of a classblock."
-
+                    
             case "deletechild":
-                return ">deletechild\n"
+                return ">deletechild <targetclass> <childclass>\n"
                     + " Removes a specific child from a classblock."
-
+                    
             case "getchildren":
-                return ">getchildren\n"
+                return ">getchildren <targetclass>\n"
                     + " Returns all of the children for a classblock."
-
+                
             case "addchild":
-                return ">addchild\n"
+                return ">addchild <targetclass> <childclass> <relationship>\n"
                     + " Adds a child to a classblock."
-
+            case "modrel":
+                return ">modrel <parentclass> <childclass> <relationship>"
             default:
                 return cmd + " is not a command"
         }
@@ -130,6 +131,13 @@ export class backEnd {
                         + ">printall\n"
                         + ">save\n"
                         + ">load\n"
+                        + ">addchild\n"
+						+ ">deletechild\n"
+						+ ">getchildren\n"
+						+ ">addparent\n"
+						+ ">getparent\n"
+                        + ">removeparent\n"
+                        + ">modrel\n"
                         + "type >help <command> for instructions on that command", true];
                 }
 
@@ -144,11 +152,12 @@ export class backEnd {
                 }
 
             case "delete":
-                if (this.userClasses.has(args[1])) {
-                    this.userClasses.delete(args[1]);
-                    return [args[1] + " deleted", true];
-                } else {
+                if (args.length != 2) {
+                    return ["Please use this format: >delete <targetclass>", false];
+                } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " class does not exist", false];
+                } else {
+                    return [this.deleteClassBlock(args[1]), true];
                 }
 
             case "addvar":
@@ -245,23 +254,23 @@ export class backEnd {
                 return ["Loading", true]
 
             case "addparent":
-                if (args.length != 3) {
-                    return ["format: >addparent <targetclass> <parentclass>", false];
+                if (args.length != 4) {
+                    return ["format: >addparent <targetclass> <parentclass> <relationship>", false];
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 } else if (!this.userClasses.has(args[2])) {
                     return [args[2] + " does not exist", false];
-                }
-                return [this.addParent(args[1], args[2]), true];
-
-            case "getparent":
+                }				
+                return [this.addParent(args[1], args[2], args[3]), true];
+                
+            case "getparent": 
                 if (args.length != 2) {
                     return ["format: >getparent <targetclass>", false];
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 }
                 return [this.getParent(args[1]), true];
-
+        
             case "removeparent":
                 if (args.length != 2) {
                     return ["format: >removeparent <targetclass>", false];
@@ -269,17 +278,17 @@ export class backEnd {
                     return [args[1] + " does not exist", false];
                 }
                 return [this.removeParent(args[1]), true];
-
+        
             case "addchild":
-                if (args.length < 3) {
-                    return ["format: >addchild <targetclass> <childclass>", false];
+                if (args.length != 4) {
+                    return ["format: >addchild <targetclass> <childclass> <relationship>", false];
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 } else if (!this.userClasses.has(args[2])) {
                     return [args[2] + " does not exist", false];
                 }
-                return [this.addChild(args[1], args[2]), true];
-
+                return [this.addChild(args[1], args[2], args[3]), true];
+        
             case "getchildren":
                 if (args.length != 2) {
                     return ["format: >getchildren <targetclass>", false];
@@ -287,10 +296,10 @@ export class backEnd {
                     return [args[1] + " does not exist", false];
                 }
                 return [this.getChildren(args[1]), true];
-
+        
             case "deletechild":
                 if (args.length != 3) {
-                    return ["format: >getchildren <targetclass>", false];
+                    return ["format: >deletechild <targetclass> <childclass>", false];
                 } else if (!this.userClasses.has(args[1])) {
                     return [args[1] + " does not exist", false];
                 } else if (!this.userClasses.has(args[2])) {
@@ -298,9 +307,54 @@ export class backEnd {
                 }
                 return [this.deleteChild(args[1], args[2]), true];
 
+            case "modrel":
+                if (args.length != 4) {
+                    return ["format: >modrel <targetclass> <childclass> <relationship>", false];
+                } else if (!this.userClasses.has(args[1])) {
+                    return [args[1] + " does not exist", false];
+                } else if (!this.userClasses.has(args[2])) {
+                    return [args[2] + " does not exist", false];
+                } else if (!(args[3] === "strong" || 
+                        args[3] === "weak" || 
+                        args[3] === "is-a" || 
+                        args[3] === "impl")) {
+                        return [args[3] + " is not a valid relationship", false];
+                    }
+                return [this.modifyRelationship(args[1], args[2], args[3]), true];
+
             default:
                 return [args[0] + " is not a command", false];
         }
+    }
+/* Called Functions */
+
+    /**
+     * Function for deleting a classblock.
+     * Needs to check if the classblock has children,
+     * 	if so it will delete accordingly based on their relationship.
+     * @param targetClass 
+     */
+    deleteClassBlock(targetClass : string)
+    {
+	    var target = this.userClasses.get(targetClass);
+	    //checking for children.
+	    if (target.getChildren().length > 0) {
+		    //Runs through each child and performs the correct action.
+		    //Based on their relationship with the classblack we are deleting.
+		    target.getChildren().forEach(child => {
+			    var c = this.userClasses.get(child[0]);
+			    c.removeParent();
+			    if (child[1] === "strong") {
+				    this.userClasses.delete(child[0]);
+			    }
+		    });
+	    }
+	    //checking if a parent exists.
+	    if (target.getParent()[0] != null) {
+		    this.userClasses.get(target.getParent()[0]).removeChild(targetClass);
+	    }
+	    this.userClasses.delete(targetClass);
+	    return (targetClass + " has been deleted.");
     }
 
     /**
@@ -308,11 +362,15 @@ export class backEnd {
      * @param targetClass 
      */
     getChildren(targetClass: string) {
-        var array = this.userClasses.get(targetClass).getChildren();
-        if (array.length <= 0) {
+        var temp = this.userClasses.get(targetClass).getChildren();
+	    var children = new Array();
+        if(temp.length <= 0) {
             return ("This class has no children");
-        }
-        return ("children: " + array);
+	    }
+	    for (var c in temp) {
+		    children.push(temp[c][0]);
+	    }
+        return ("children: " + children);
     }
 
     /**
@@ -320,9 +378,15 @@ export class backEnd {
      * @param targetClass 
      * @param childClass 
      */
-    addChild(targetClass: string, childClass: string) {
-        this.userClasses.get(targetClass).addChild(childClass);
-        this.userClasses.get(childClass).setParent(targetClass);
+    addChild(targetClass : string, childClass : string, relationship : string)
+    {   
+	    var target = this.userClasses.get(targetClass);
+	    var child = this.userClasses.get(childClass);
+	    if (target.getParent()[0] === childClass) {
+		    return (targetClass + " is already a child of " + childClass);
+	    }
+        target.addChild(childClass, relationship);
+        child.setParent(targetClass, relationship);
         return ("added " + childClass + " as a child to " + targetClass + ".");
     }
 
@@ -332,8 +396,9 @@ export class backEnd {
      * @param childClass 
      */
     deleteChild(targetClass: string, childClass: string) {
-        if ((this.userClasses.get(targetClass).getChildren()).indexOf(childClass) > -1) {
+        if((this.userClasses.get(targetClass).getChildIndex(childClass)) > -1) {
             this.userClasses.get(targetClass).removeChild(childClass);
+            this.userClasses.get(childClass).removeParent();
             return ("Removed " + childClass + " from the children's array of " + targetClass + ".");
         }
         return (childClass + " is not a child of " + targetClass + ".");
@@ -344,7 +409,7 @@ export class backEnd {
      * @param targetClass 
      */
     getParent(targetClass: string) {
-        if (this.userClasses.get(targetClass).getParent() == null) {
+        if (this.userClasses.get(targetClass).getParent()[0] == null) {
             return ("There is no parent class for " + targetClass + ".");
         }
         return ("The parent of " + targetClass + " is " + this.userClasses.get(targetClass).getParent() + ".");
@@ -354,10 +419,17 @@ export class backEnd {
      * Adds a parent to a specific class block.
      * @param targetClass 
      * @param parentClass 
+     * @param relationship 
      */
-    addParent(targetClass: string, parentClass: string) {
-        this.userClasses.get(targetClass).setParent(parentClass);
-        this.userClasses.get(parentClass).addChild(targetClass);
+    addParent(targetClass : string, parentClass : string, relationship : string)
+    {
+	    var target = this.userClasses.get(targetClass);
+	    var parent = this.userClasses.get(parentClass);
+	    if (parent.getParent()[0] === targetClass) {
+		    return (targetClass + " is already the parent of " + parentClass);
+	    }
+        target.setParent(parentClass, relationship);
+        parent.addChild(targetClass, relationship);
         return ("Added " + parentClass + " as the parent for " + targetClass);
     }
 
@@ -366,9 +438,33 @@ export class backEnd {
      * @param targetClass 
      */
     removeParent(targetClass: string) {
-        this.userClasses.get(targetClass).removeParent();
-        return ("Removed the parent of " + targetClass + ".");
+        var parent = this.userClasses.get(targetClass).getParent()[0];
+	    this.userClasses.get(parent).removeChild(targetClass);
+	    this.userClasses.get(targetClass).removeParent();
+
+	    return ("Removed the parent of " + targetClass + ".");
     }
+
+    /**
+     * The ability to change an existing type of relationship
+     *  E.g. change from strong to weak.
+     * @param parentClass 
+     * @param childClass  
+     * @param relationship
+     */
+    modifyRelationship(parentClass: string, childClass: string, relationship: string) {
+        var target = this.userClasses.get(parentClass);
+        var child = this.userClasses.get(childClass);
+        var children = target.getChildren();
+        var index = target.getChildIndex(childClass);
+        if (index < 0) {
+            return false;
+        }
+        children[index][1] = relationship;
+        child.getParent()[1] = relationship;
+        return ("Changed the relationship of " + parentClass + " and " + childClass + " to " + relationship + ".");
+    }
+
     /** rename (string, string) returns string
      * Renames a class
     **/

@@ -33,11 +33,25 @@ body{
 }
 
 .classblock .variables {
-	pointer-events: none;
+	/*pointer-events: none;*/
 }
 
 .classblock .functions {
-	pointer-events: none;
+	/*pointer-events: none;*/
+}
+
+.classblock .variables .editVar {
+	width: 5px;
+	height: 10px;
+	white-space: normal;
+	cursor: pointer;
+}
+
+.classblock .functions .editFun {
+	width: 5px;
+	height: 10px;
+	white-space: normal;
+	cursor: pointer;
 }
 
 .classblock strong {
@@ -74,7 +88,6 @@ body{
 	min-width: 100px;
 
 }
-
 
 .child {
 	background-color: green;
@@ -172,7 +185,7 @@ body{
 	white-space: normal;
 }
 
-#delete{
+#delete {
 	height: 50px;
 	width: 90%;
 	margin: 5%;
@@ -181,12 +194,64 @@ body{
 	white-space: normal;
 }
 
-#blockArea{
+#addRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+#editRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+#deleteRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+
+#addRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+#editRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+#deleteRelationship{
+	height: 50px;
+	width: 90%;
+	margin: 5%;
+	margin-bottom: 25px;
+	cursor: pointer;
+	white-space: normal;
+}
+
+#blockArea {
 	width: calc(100% - 90px);
+	size: 2000px;
 	height: 100vh;
 	float: left;
 	background-color: grey;
-	overflow: hidden;
+	overflow: scroll !important;
+	position: relative;
 }
 
 .dropdown{
@@ -194,7 +259,6 @@ body{
 	top: 225px !important;
 	left: 0px !important;
 }
-
 
 li{
 	text-align: left;

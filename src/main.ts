@@ -1,6 +1,6 @@
 import { backEnd } from './backEnd'
 //import * as jsPlumb from '../node_modules/jsplumb/index.d'
-import * as jsPlumb from '../dist/jsplumb.min'
+//import * as jsPlumb from '../dist/jsplumb.min'
 
 let back = new backEnd();
 let command : JQuery = $("#command");
@@ -10,6 +10,7 @@ $(function() {
 	//vars
 	let log : JQuery = $("#log");
 	let command : JQuery = $("#command");
+	let jsPlumb = require("../dist/jsplumb.min.js").jsPlumb;
 
 	//do on page load
 	log.val("UML Terminal\n>help");
@@ -39,16 +40,16 @@ $(function() {
         if (load == true) {
           $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <strong>" + name + "</strong>"+  "</div>");
 
-			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
-			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
+			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div>");
+			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div>");
         }
 
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
         //The appended html adds the visual class block element to the #blockArea.
         if (name && back.doCommand("create " + name)[1]) {
 			$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
-			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
-			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
+			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "<input type =\"button\" class = \"editVar\" value = \"+ \" </button>" + "</div>");
+			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "<input type =\"button\" class = \"editFun\" value = \"+ \" </button>" + "</div>");
         }
     }
 
@@ -419,16 +420,84 @@ $(function() {
 	});
 
 	$("#addRelationship").click(function() {
-		let name = prompt("Please enter the name of the classes you'd like to add a relationship between (Please enter the parent first, followed by a space and then the child)");
-		addChild(name);
-		
+		let name = prompt("Please enter the name of the classes you'd like to add a relationship between, followed by the type of relationship (Please enter the parent first, followed by the child, than the relationship type, separated by spaces) <Parent> <Child> <Relationship>");
+		let inputSplit : Array<string> = name.split(" ");
+		/*
+		*inputSplit[0] = parent
+		inputSplit[1] = child
+		inputSplit[2] = relationship
+		*/
+		back.addChild(inputSplit[0], inputSplit[1], inputSplit[2]);
+		let parent = $('[name="' + inputSplit[0] + '"]').attr("name");
+		let child : string = inputSplit[1];
+		let rType = inputSplit[2];
+		//prevents connecting to an undefined/null classblock
+		//Connects parents and children
+		if (parent != undefined) {	
+			console.log("Inside parent != undefined");
+			//temporary check
+			while(!(rType === "strong" ||
+					rType === "weak" ||
+					rType === "is-a" ||
+					rType === "impl")) {
+				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
+			}
+			//Ensures you enter a name for the child
+			if (child == undefined || child == null) {
+				console.log("Inside child == undefined || child == null")
+				alert("Please enter a valid child name");
+				return;
+			} else {
+				//create a block with that name and draw a line to it (if it doesnt exist already)
+				if (!back.userClasses.has(child)) {
+					addBlock(child);
+				}
+				//code to draw line
+				var ep1 = jsPlumb.addEndpoint(parent, {
+					connectorOverlays:[
+						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
+						[ "Label", { label:rType, id:"quantifier"} ]
+					],
+				  });
+				var ep2 = jsPlumb.addEndpoint(child);
+				jsPlumb.connect({ source:ep1, target:ep2 });
+			}
+		} else {
+			alert("Cannot add a child to a class that doesn't exist");
+		}
+	});
+	//Strong relationship - Child depends on the parent, if the parent is deleted the child/children should be deleted
+	//Weak relationship - If a parent is deleted, the children should stay
+	//is-a relationship - The child has to inherit all the parent functions and variables,
+	//If you delete a parent, the child for "is-a" stays but loses all of the parents functions/variables
+	//
+	$("#deleteRelationship").click(function() {
+		let name = prompt("Please enter the name of the two classes you'd like to delete the relationship from, separated by a space(<Parent> <Child>)");
+		let inputSplit : Array<string> = name.split(" ");
+		/*
+		inputSplit[0] = parent
+		inputSplit[1] = child
+		*/
+
+		let child: string = inputSplit[0];
+		let parent: string = inputSplit[1];
+
+		let relationshipType = 'poop';
+		if(relationshipType == "strong"){
+			//Deletes child
+			back.deleteChild(child, parent)
+			jsPlumb.remove(parent)
+		} else {
+		}
+		if (back.getParent(parent)){
+			back.deleteChild(child, parent);
+			back.removeParent(parent);
+		} else {
+			alert("There is no parent for " + parent + "named " + child)
+		}
+
 	});
 
-	$("#deleteRelationshipp").click(function() {
-		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
-		addChild(name);
-		
-	});
 
 	//deletes class both in the GUI and backend
 	function deleteClass(name : string){
@@ -453,21 +522,97 @@ $(function() {
 	});
 
 
+	/*
+	* Edits the relationship between classes
+	* used when you want to change an existing relationship between classes to something else
+	*/
+	$("#editRelationship").click(function() {
+		let name = prompt("Please enter the name of the two classes you'd like to edit the relationship between, followed by the new type of relationship, separated by a space(<Parent> <Child> <Relationship>)");
+		let inputSplit : Array<string> = name.split(" ");
+		/*
+		inputSplit[0] = parent
+		inputSplit[1] = child
+		inputSplit[2] = relationship
+		*/
+		let parent = $('[name="' + inputSplit[0] + '"]').attr("name");
+		let child: string = inputSplit[1]
+		let rType: string = inputSplit[2]
+		if (parent != undefined) {	
+			console.log("Inside parent != undefined");
+			//temporary check
+			while(!(rType === "strong" ||
+					rType === "weak" ||
+					rType === "is-a" ||
+					rType === "impl")) {
+				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
+			}
+			//Ensures you enter a name for the child
+			if (child == undefined || child == null) {
+				console.log("Inside child == undefined || child == null")
+				alert("Please enter a valid child name");
+				return;
+			} else {
+				//create a block with that name and draw a line to it (if it doesnt exist already)
+				if (!back.userClasses.has(child)) {
+					back.modifyRelationship(parent, child, rType);
+					addBlock(child);
+				}
+				//code to draw line
+				var ep1 = jsPlumb.addEndpoint(parent, {
+					connectorOverlays:[
+						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
+						[ "Label", { label:rType, id:"quantifier"} ]
+					],
+				  });
+				var ep2 = jsPlumb.addEndpoint(child);
+				jsPlumb.connect({ source:ep1, target:ep2 });
+			}
+		} else {
+			alert("Cannot add a child to a class that doesn't exist");
+		}
+	});
+
+
+
+
+
+
+
+
+
+
 	//Handles the dragging of classblocks
 	//Allows classblocks to be dragged
 	$('#blockArea').on("mousedown", ".classblock", function(e) {
 		dragBlock();
 	});
 
+	$('#blockArea').on("", ".classblock", function(e) {
+			let checkBlock = $(this).position();
+			console.log(checkBlock.left, checkBlock.top);
+
+			if(checkBlock.top < 0) {
+				console.log("we got to check the top");
+				$(this).css("top", "10px");
+			}
+
+			if(checkBlock.left < 75) {
+			console.log("we got to check the left");
+			$(this).css("left", "25px");
+			}
+	});
+
+
 	function dragBlock() {
 		let classBlock = jsPlumb.getInstance();
 		classBlock.draggable($(".classblock"), {
-				containment: true,
+				//containment: '#blockArea',
         		drag:function() {
 				//need to repaint everything so the relationship lines follow.
 				jsPlumb.repaintEverything();
 			}
 		});
+		
 	}
 
 

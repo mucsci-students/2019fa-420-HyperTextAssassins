@@ -2,7 +2,7 @@ export class classBlock {
 	private name : string;
 	private vars : string[][] = new Array();
 	private funs : string[] = new Array();
-	private parent = [null, null];
+	public parent = [null, null];
 	private children : string[][] = new Array();
 
 	constructor (name : string) {
@@ -180,6 +180,8 @@ export class classBlock {
 	{
 		return this.children;
 	}
+
+	getRelationship
 
 	/**
 	 * Returns the index of a child.

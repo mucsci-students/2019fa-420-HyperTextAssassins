@@ -178,24 +178,6 @@ export class classBlock {
 		return this.children;
 	}
 
-	getRelationship
-
-	/**
-	 * Returns the index of a child.
-	 * @param child 
-	 */
-	getChildIndex(child: string)
-	{
-		if (this.children.length < 1) {
-			return -1;
-		}
-		for (var c in this.children) {
-			if (this.children[c][0] === child) {
-				return c
-			}
-		}
-	}
-
 	/**
 	 * Returns the index of a child.
 	 * @param child 

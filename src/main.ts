@@ -461,6 +461,7 @@ $(function() {
 		let parent = $('[name="' + inputSplit[0] + '"]').attr("name");
 		let child : string = inputSplit[1];
 		let rType = inputSplit[2];
+		rType = rType.toLowerCase();
 		//prevents connecting to an undefined/null classblock
 		//Connects parents and children
 		if (parent != undefined) {	
@@ -483,14 +484,14 @@ $(function() {
 					addBlock(child);
 				}
 				//code to draw line
-				var ep1 = jsPlumb.addEndpoint(parent, {
+				var ep1 = pi.addEndpoint(parent, {
 					connectorOverlays:[
 						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
 						[ "Label", { label:rType, id:"quantifier"} ]
 					],
 				  });
-				var ep2 = jsPlumb.addEndpoint(child);
-				jsPlumb.connect({ source:ep1, target:ep2 });
+				var ep2 = pi.addEndpoint(child);
+				pi.connect({ source:ep1, target:ep2 });
 			}
 		} else {
 			alert("Cannot add a child to a class that doesn't exist");
@@ -587,27 +588,19 @@ $(function() {
 					addBlock(child);
 				}
 				//code to draw line
-				var ep1 = jsPlumb.addEndpoint(parent, {
+				var ep1 = pi.addEndpoint(parent, {
 					connectorOverlays:[
 						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
 						[ "Label", { label:rType, id:"quantifier"} ]
 					],
 				  });
-				var ep2 = jsPlumb.addEndpoint(child);
-				jsPlumb.connect({ source:ep1, target:ep2 });
+				var ep2 = pi.addEndpoint(child);
+				pi.connect({ source:ep1, target:ep2 });
 			}
 		} else {
 			alert("Cannot add a child to a class that doesn't exist");
 		}
 	});
-
-
-
-
-
-
-
-
 
 
 	//Handles the dragging of classblocks
@@ -616,7 +609,7 @@ $(function() {
 		dragBlock();
 	});
 
-	$('#blockArea').on("", ".classblock", function(e) {
+	$('#blockArea').on("mouseup", ".classblock", function(e) {
 			let checkBlock = $(this).position();
 			console.log(checkBlock.left, checkBlock.top);
 

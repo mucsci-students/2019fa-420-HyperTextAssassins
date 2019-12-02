@@ -1,15 +1,29 @@
 import { backEnd } from './backEnd'
 //import * as jsPlumb from '../node_modules/jsplumb/index.d'
-import * as jsPlumb from '../dist/jsplumb.min'
 
 let back = new backEnd();
 let command : JQuery = $("#command");
+
+let jsPlumb = require("../dist/jsplumb.min.js").jsPlumb;
 
 
 $(function() {
 	//vars
 	let log : JQuery = $("#log");
 	let command : JQuery = $("#command");
+	let pi = jsPlumb.getInstance({
+		anchor:"Continuous",
+		Endpoint: ["Dot", {radius: 3}],
+        HoverPaintStyle: {stroke: "#1e8151", strokeWidth: 2 },
+	});
+
+	
+	/*var canvas = document.getElementById("#blockarea");
+	pi.on(canvas, "dblclick", function(e) {
+	
+	});*/
+
+	
 
 	//do on page load
 	log.val("UML Terminal\n>help");
@@ -37,11 +51,10 @@ $(function() {
         //same code below but needed to bypass doCommand check when loading file 
         //(other wise create will return false on load)
         if (load == true) {
-          $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <strong>" + name + "</strong>"+  "</div>");
-
+          	$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <strong>" + name + "</strong>"+  "</div>");
 			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
 			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
-        }
+		}
 
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
         //The appended html adds the visual class block element to the #blockArea.
@@ -49,7 +62,8 @@ $(function() {
 			$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
 			$("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
 			$("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
-        }
+		}
+		
     }
 
     //click event for adding a class block
@@ -385,6 +399,14 @@ $(function() {
 					rType === "impl")) {
 				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
 			}
+			let oType = prompt("o type");//will switch to radio buttons
+			//temporary check
+			/*while(!(oType === "one:one" || 
+					oType === "one:many" || 
+					oType === "many:one" || 
+					oType === "many:many")) {
+				oType = prompt('please enter a correct one kid.');
+			}*/
 			//Ensures you enter a name for the child
 			if (childName == undefined || childName == null) {
 				alert("Please enter a valid child name");
@@ -396,15 +418,24 @@ $(function() {
 				}
 
 				//code to draw line
-				let childDiv =$('[name="' + childName + '"]');
-				var ep1 = jsPlumb.addEndpoint(name, {
+				var shape = "PlainArrow";
+				if (rType === 'strong' || rType === 'weak') {
+					shape = "Diamond";
+				}
+				var ep1 = pi.addEndpoint(name, {
 					connectorOverlays:[ 
-						[ "PlainArrow", { width:10, length:30, location:1, id:"arrow" } ],
-						[ "Label", { label:rType, id:"quantifier"} ]
+						[ shape, { width:10, length:30, location:1, id:"connection" } ]
 					],
-				  });
-			var ep2 = jsPlumb.addEndpoint(childName);
-				jsPlumb.connect({ source:ep1, target:ep2 });
+				});
+				var ep2 = pi.addEndpoint(childName);
+
+				var conn = pi.connect({ 
+					source:ep1, 
+					target:ep2,
+				});
+				conn.setLabel(function(c) {
+					return oType;
+				});
 			}
 		} else {
 			alert("Cannot add a child to a class that doesn't exist");
@@ -418,9 +449,17 @@ $(function() {
 		
 	});
 
+	$("#addRelationship").click(function() {
+		let name = prompt("Please enter the name of the classes you'd like to add a relationship between (Please enter the parent first, followed by a space and then the child)");
+		addChild(name);
+		
+	});
 
-
-
+	$("#deleteRelationshipp").click(function() {
+		let name = prompt("Please enter the name of the class you'd like to add a child to", "Class");
+		addChild(name);
+		
+	});
 
 	//deletes class both in the GUI and backend
 	function deleteClass(name : string){
@@ -429,7 +468,7 @@ $(function() {
 		//find div based on name and remove the entire classblock, including all child elements
 		if (back.userClasses.get(name)){
 			if(confirm("Are you sure you want to delete this class?") && back.doCommand("delete " + name)[1]){
-				jsPlumb.remove(name);
+				pi.remove(name);
 				$('[name="' + name + '"]').remove();
 			}
 		} else {
@@ -452,12 +491,11 @@ $(function() {
 	});
 
 	function dragBlock() {
-		let classBlock = jsPlumb.getInstance();
-		classBlock.draggable($(".classblock"), {
-				containment: true,
-        		drag:function() {
+		pi.draggable($(".classblock"), {
+			containment: true,
+        	drag:function() {
 				//need to repaint everything so the relationship lines follow.
-				jsPlumb.repaintEverything();
+				pi.repaintEverything();
 			}
 		});
 	}

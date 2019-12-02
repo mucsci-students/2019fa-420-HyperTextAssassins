@@ -427,6 +427,25 @@ export class backEnd {
 
 	return ("Removed the parent of " + targetClass + ".");
     }
+	
+    /**
+     * The ability to change an existing type of relationship
+     * @param targetClass 
+     * @param childClass 
+     * @param relationship 
+     */
+    modifyRelationship(targetClass: string, childClass: string, relationship: string) {
+        var target = this.userClasses.get(targetClass);
+        var child = this.userClasses.get(childClass);
+        var children = target.getChildren();
+        var index = target.getChildIndex(childClass);
+        if (children.length < index) {
+            return false;
+        }
+        children[index][1] = relationship;
+        child.getParent()[1] = relationship;
+        return ("Changed the relationship of " + targetClass + " and " + childClass + " to " + relationship + ".");
+    }
 
     /** rename (string, string) returns string
      * Renames a class

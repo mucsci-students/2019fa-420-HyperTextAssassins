@@ -136,8 +136,10 @@ export class backEnd {
 						+ ">getchildren\n"
 						+ ">addparent\n"
 						+ ">getparent\n"
+
                         + ">removeparent\n"
                         + ">modrel\n"
+
                         + "type >help <command> for instructions on that command", true];
                 }
 
@@ -388,7 +390,7 @@ export class backEnd {
         target.addChild(childClass, relationship);
         child.setParent(targetClass, relationship);
         return ("added " + childClass + " as a child to " + targetClass + ".");
-    }
+}
 
     /**
      * Allows you to remove a child from a parents children array.
@@ -442,6 +444,7 @@ export class backEnd {
 	    this.userClasses.get(parent).removeChild(targetClass);
 	    this.userClasses.get(targetClass).removeParent();
 
+
 	    return ("Removed the parent of " + targetClass + ".");
     }
 
@@ -462,6 +465,7 @@ export class backEnd {
         }
         children[index][1] = relationship;
         child.getParent()[1] = relationship;
+
         return ("Changed the relationship of " + parentClass + " and " + childClass + " to " + relationship + ".");
     }
 

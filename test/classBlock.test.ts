@@ -55,4 +55,49 @@ describe('classBlock Tests', function () {
         expect(block.print()).toEqual("Class : myName Variables : <myType> myVar Functions : myFun");
     });
 
+    /* parents */
+    it('.setParent() should fail if the parent being added is already the parent', function() {
+        const block = new classBlock('class1');
+        const block2 = new classBlock('class2');
+        block.setParent('class2', 'strong');
+        expect(block.setParent('class2', 'strong')).toEqual(false);
+    });
+
+    it('.removeParent should return true', function() {
+        const block = new classBlock('class1');
+        const block2 = new classBlock('class2');
+        block.setParent('class2', 'strong');
+        expect(block.removeParent()).toEqual(true);
+    })
+
+    it('.getParent() should grab the parent of a classblock', function() {
+        const block = new classBlock('class1');
+        const block2 = new classBlock('class2');
+        block.setParent('class2', 'strong');
+        expect(block.getParent()[0]).toContain('class2');
+        expect(block.getParent()[1]).toContain('strong');
+    });
+
+    /* children */
+    it('.addChild() should add the child to a block and return true', function () {
+        const block = new classBlock('1');
+        const block2 = new classBlock('2');
+        expect(block.addChild('2', 'weak')).toEqual(true);
+    });
+
+    it('.getChildren() should return null if no children', function () {
+        const block = new classBlock('1');
+        expect(block.getChildren()).toMatch('');
+    });
+
+    it('.removeChild() should fail if the child isnt an exisiting child.', function () {
+        const block = new classBlock('1');
+        expect(block.removeChild('2')).toEqual(false);
+    });
+
+    it('.print() on a class with a parent should return "Class : <name> Parent : <parent>(<type>)".', function () {
+        const block = new classBlock('1');
+        block.setParent('2', 'strong')
+        expect(block.print()).toContain("Class : 1 Parent : 2(strong)");
+    });
 });

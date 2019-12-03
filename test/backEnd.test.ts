@@ -30,6 +30,15 @@ describe('backEnd Tests', function () {
         back.doCommand('create class2');
         expect(back.doCommand('addparent class1 class2 strong')).toContain('Added class2 as the parent for class1')
     });
+    
+     it('.doCommand() can add a parent to a classBlock', function () {
+        let back = new backEnd();
+        back.doCommand('create      manySpaces');
+        back.doCommand('create      manyMore');
+        expect(back.doCommand('addparent manySpaces manyMore strong')).toContain('Added manyMore as the parent for manySpaces')
+    });
+    
+    
     it('.doCommand() can get the parent of a classBlock', function () {
         let back = new backEnd();
         back.doCommand('create class1');
@@ -37,12 +46,29 @@ describe('backEnd Tests', function () {
         back.doCommand('addparent class1 class2 strong')
         expect(back.doCommand('getparent class1')).toContain('The parent of class1 is class2,strong.')
     });
+    
+    it('.doCommand() can get the parent of a classBlock', function () {
+        let back = new backEnd();
+        back.doCommand('create      manySpaces');
+        back.doCommand('create      manyMore');
+        back.doCommand('addparent manySpaces manyMore strong')
+        expect(back.doCommand('getparent manySpaces')).toContain('The parent of manySpaces is manyMore,strong.')
+    });
+    
     it('.doCommand() can remove the parent from a classblock', function () {
         let back = new backEnd();
         back.doCommand('create class1');
         back.doCommand('create class2');
         back.doCommand('addparent class1 class2 strong')
         expect(back.doCommand('removeparent class1')).toContain('Removed the parent of class1.')
+    });
+    
+    it('.doCommand() can remove the parent from a classblock', function () {
+        let back = new backEnd();
+        back.doCommand('create      manySpaces');
+        back.doCommand('create      manyMore');
+        back.doCommand('addparent manySpaces manyMore strong')
+        expect(back.doCommand('removeparent manySpaces')).toContain('Removed the parent of manySpaces.')
     });
 
     /* relationship children (rc)*/
@@ -52,6 +78,14 @@ describe('backEnd Tests', function () {
         back.doCommand('create class2');
         expect(back.doCommand('addchild class2 class1 strong')).toContain('added class1 as a child to class2.')
     });
+    
+    it('.doCommand() can add a child to a classBlock', function () {
+        let back = new backEnd()
+        back.doCommand('create        manySpaces');
+        back.doCommand('create        manyMore');
+        expect(back.doCommand('addchild manyMore manySpaces strong')).toContain('added manySpaces as a child to manyMore.')
+    });
+    
     it('.doCommand() can get the children of a classBlock', function () {
         let back = new backEnd()
         back.doCommand('create class1');
@@ -59,12 +93,29 @@ describe('backEnd Tests', function () {
         back.doCommand('addchild class2 class1 strong')
         expect(back.doCommand('getparent class1')).toContain('The parent of class1 is class2,strong.')
     });
+    
+    it('.doCommand() can get the children of a classBlock', function () {
+        let back = new backEnd()
+        back.doCommand('create     manySpaces');
+        back.doCommand('create     manyMore');
+        back.doCommand('addchild manyMore manySpaces strong')
+        expect(back.doCommand('getparent manySpaces')).toContain('The parent of manySpaces is manyMore,strong.')
+    });
+    
     it('.doCommand() can remove a child from a classblock', function () {
         let back = new backEnd()
         back.doCommand('create class1');
         back.doCommand('create class2');
         back.doCommand('addchild class2 class1 strong')
         expect(back.doCommand('deletechild class2 class1')).toContain("Removed class1 from the children's array of class2.")
+    });
+    
+    it('.doCommand() can remove a child from a classblock', function () {
+        let back = new backEnd()
+        back.doCommand('create       manySpaces');
+        back.doCommand('create       manyMore');
+        back.doCommand('addchild manyMore manySpaces strong')
+        expect(back.doCommand('deletechild manyMore manySpaces')).toContain("Removed manySpaces from the children's array of manyMore.")
     });
 
 });

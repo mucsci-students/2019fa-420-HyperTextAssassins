@@ -13,9 +13,10 @@ $(function() {
 	let command : JQuery = $("#command");
 
 	let pi = jsPlumb.getInstance({
-		anchor:"Continuous",
-		Endpoint: ["Dot", {radius: 3}],
-        HoverPaintStyle: {stroke: "#1e8151", strokeWidth: 2 },
+		DragOptions: { cursor: 'pointer', zIndex: 2000 },
+		//anchor:"Continuous",
+		//Endpoint: ["Dot", {radius: 3}],
+		//HoverPaintStyle: {stroke: "#1e8151", strokeWidth: 2 },
 	});
 
 	
@@ -53,7 +54,7 @@ $(function() {
           	$("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> <strong>" + name + "</strong>"+  "</div>");
 			      $("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
 			      $("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
-		  }
+		}
 
 
         //check if the name is null, and if doCommand successfully inserted the name into the userClasses map
@@ -62,9 +63,132 @@ $(function() {
 			    $("#blockArea").append("<div class= \"classblock\" id=" + name + " name =" + name + "> " + "<strong>" + name + "</strong>"+  "</div>");
 			    $("#" + name).append("<div class= \"variables\" > " + "<i> Variables </i>" + "</div");
 			    $("#"+ name).append("<div class= \"functions\"> " + "<i> Functions </i>" + "</div");
-		    }
+		}
 
-    }
+		var exampleDropOptions = {
+			tolerance: "touch",
+			hoverClass: "dropHover",
+			activeClass: "dragActive"
+		};
+		var shape = 'Arrow';
+		var quantifier = 'one:one';
+		var realizationEp = {
+			endpoint: "Rectangle",
+			paintStyle: { width: 15, height: 11, fill: '#080080' },
+			anchor:"Continuous",
+			isSource: true,
+			scope: "blue",
+			connectorStyle: {
+				gradient: {stops: [
+					[0, '#080080'],
+					[0.5, "#09098e"],
+					[1, '#080080']
+				]},
+				strokeWidth: 5,
+				stroke: '#080080',
+				dashstyle: "2 2"
+			},
+			maxConnections: -1,
+			isTarget: true,
+			beforeDrop: function (params) {;
+				shape = backendAddChild(params, 'impl');
+				if (shape === 'fail') {
+					return false;
+				}
+				quantifier = prompt("Please enter a relationship quantifier.");
+				while(!(quantifier === "one:one" || 
+					quantifier === "one:many" || 
+					quantifier === "many:one" || 
+					quantifier === "many:many")) {
+					quantifier = prompt('Please enter a relationship quantifier. \n valid inputs:\n one:one | one:many | many:one | many:many.');
+				}
+				return true;
+			},
+			connectorOverlays:[ 
+				[ shape, { width:10, length:30, location:1, id:"connection" } ],
+				[ "Label", {label:quantifier, id:"label"}]
+			],
+			dropOptions: exampleDropOptions
+		};
+		var generalizationEp = {
+			endpoint: ["Dot", { radius: 11 }],
+			anchor:"Continuous",
+			paintStyle: { fill: '#e7e728' },
+			isSource: true,
+			scope: "green",
+			connectorStyle: { stroke: '#e7e728', strokeWidth: 6 },
+			connector: ["Bezier", { curviness: 63 } ],
+			maxConnections: -1,
+			isTarget: true,
+			beforeDrop: function (params) {;
+				console.log(params)
+				shape = backendAddChild(params, 'is-a');
+				if (shape) {
+					console.log('shape');
+					return true;
+				}
+				console.log('shape false');
+				return false;
+			},
+			connectorOverlays:[ 
+				[ shape, { width:10, length:30, location:1, id:"connection" } ]
+			],
+			dropOptions: exampleDropOptions
+		};
+
+		var aggregationEp = {
+			endpoint: ["Dot", { radius: 11 }],
+			anchor:"Continuous",
+			paintStyle: { fill: '#008000' },
+			isSource: true,
+			scope: "green",
+			connectorStyle: { stroke: '#008000', strokeWidth: 6 },
+			connector: ["Bezier", { curviness: 63 } ],
+			maxConnections: -1,
+			isTarget: true,
+			beforeDrop: function (params) {;
+				console.log(params)
+				shape = backendAddChild(params, 'weak');
+				if (shape) {
+					console.log('shape');
+					return true;
+				}
+				console.log('shape false');
+				return false;
+			},
+			connectorOverlays:[ 
+				[ shape, { width:10, length:30, location:1, id:"connection" } ]
+			],
+			dropOptions: exampleDropOptions
+		};
+
+		var compositionEp = {
+			endpoint: ["Dot", { radius: 11 }],
+			anchor:"Continuous",
+			paintStyle: { fill: '#ffa500' },
+			isSource: true,
+			scope: "orange",
+			connectorStyle: { stroke: '#ffa500', strokeWidth: 6 },
+			connector: ["Bezier", { curviness: 63 } ],
+			maxConnections: -1,
+			isTarget: true,
+			beforeDrop: function (params) {;
+				shape = backendAddChild(params, 'strong');
+				if (shape) {;
+					return true;
+				}
+				return false;
+			},
+			connectorOverlays:[ 
+				[ shape, { width:10, length:30, location:1, id:"connection" } ]
+			],
+			dropOptions: exampleDropOptions
+		};
+		pi.addEndpoint(name, {}, realizationEp);
+		pi.addEndpoint(name, {}, aggregationEp);
+		pi.addEndpoint(name, {}, compositionEp);
+		pi.addEndpoint(name, [], generalizationEp)
+	}
 
     //click event for adding a class block
 	$("#add").click(function(){
@@ -379,10 +503,25 @@ $(function() {
 		}	
 	});
 
-
-
-
-
+	/**
+	 * Takes care of adding the child on the backend,
+	 *  when trying to create a drag-n-drop relationship in the GUI
+	 * @param params 
+	 * @param type 
+	 */
+	function backendAddChild(params : any, type : string) {
+		var testcase = 'The parent of ' + params.targetId + ' is ' + params.sourceId + ',' + type + '.';
+		console.log(back.getParent(params.targetId));
+		console.log(testcase);
+		if (back.getParent(params.targetId) === testcase) {
+			return 'fail';
+		}
+		back.addChild(params.sourceId, params.targetId, type);
+		if (type === 'weak' || type === 'strong') {
+			return 'Diamond';
+		}
+		return 'PlainArrow';
+	}
 	//used click event for addChild in GUI, also can be called by backend
 	function addChild(name : string) {
 		let parentDiv = $('[name="' + name + '"]').attr("name");
@@ -422,12 +561,42 @@ $(function() {
 				if (rType === 'strong' || rType === 'weak') {
 					shape = "Diamond";
 				}
+				var color = '#00f';
+				var exampleDropOptions = {
+					tolerance: "touch",
+					hoverClass: "dropHover",
+					activeClass: "dragActive"
+				};
+				var dashedEndpoint = {
+					endpoint: "Rectangle",
+					paintStyle: { width: 25, height: 21, fill: color },
+					isSource: true,
+					reattach: true,
+					scope: "blue",
+					connectorStyle: {
+						gradient: {stops: [
+							[0, color],
+							[0.5, "#09098e"],
+							[1, color]
+						]},
+						strokeWidth: 5,
+						stroke: color,
+						dashstyle: "2 2"
+					},
+					isTarget: true,
+					beforeDrop: function (params) {
+						return confirm("Connect " + params.sourceId + " to " + params.targetId + "?");
+					},
+					dropOptions: exampleDropOptions
+				};
 				var ep1 = pi.addEndpoint(name, {
 					connectorOverlays:[ 
 						[ shape, { width:10, length:30, location:1, id:"connection" } ]
 					],
-				});
-				var ep2 = pi.addEndpoint(childName);
+				}, dashedEndpoint);
+				var ep2 = pi.addEndpoint(childName, {
+
+				}, dashedEndpoint);
 
 				var conn = pi.connect({ 
 					source:ep1, 

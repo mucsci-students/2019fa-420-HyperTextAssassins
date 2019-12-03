@@ -399,14 +399,14 @@ $(function() {
 					rType === "impl")) {
 				rType = prompt('please enter a correct category\nstrong, weak, is-a, impl');
 			}
-			let oType = prompt("o type");//will switch to radio buttons
+			let oType = prompt("Enter the quantifier type");//will switch to radio buttons
 			//temporary check
-			/*while(!(oType === "one:one" || 
+			while(!(oType === "one:one" || 
 					oType === "one:many" || 
 					oType === "many:one" || 
 					oType === "many:many")) {
-				oType = prompt('please enter a correct one kid.');
-			}*/
+				oType = prompt('please enter a correct quantifier type.');
+			}
 			//Ensures you enter a name for the child
 			if (childName == undefined || childName == null) {
 				alert("Please enter a valid child name");
@@ -422,11 +422,24 @@ $(function() {
 				if (rType === 'strong' || rType === 'weak') {
 					shape = "Diamond";
 				}
-				var ep1 = pi.addEndpoint(name, {
-					connectorOverlays:[ 
-						[ shape, { width:10, length:30, location:1, id:"connection" } ]
-					],
-				});
+				if (rType === 'impl') {
+					var ep1 = pi.addEndpoint(name, {
+						connectorOverlays:[ 
+							[ shape, { width:10, length:30, location:1, id:"connection" } ]
+						],
+						connectorStyle: {
+							strokeWidth: 5,
+							stroke: '#0f0',
+							dashstyle: "2 2"
+						},
+					});
+				} else {
+					var ep1 = pi.addEndpoint(name, {
+						connectorOverlays:[ 
+							[ shape, { width:10, length:30, location:1, id:"connection" } ]
+						],
+					});
+				}
 				var ep2 = pi.addEndpoint(childName);
 
 				var conn = pi.connect({ 

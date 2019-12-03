@@ -1,12 +1,16 @@
 {
-   "compilerOptions": {
-       "module": "system",
-       "removeComments": true,
-       "outFile": "main.js",
-       "target": "es5",
-       "lib": ["es5", "es6", "dom"]
-   },
-   "files": [
-       "main.ts"
-   ]
+    "compilerOptions": {
+        "sourceMap": true,
+        "target": "esnext",
+        "removeComments": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "typeRoots": [
+        "node_modules/@types"
+    ]
 }

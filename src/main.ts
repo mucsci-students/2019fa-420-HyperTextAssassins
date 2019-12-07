@@ -649,7 +649,7 @@ $(function() {
 	 * also does loading in the GUI. needs to be put here due to synchinpmng issues 
 	**/
 	$("#inputFile").on("change", function () {
-		//back.loadFile();
+		back.loadFile();
 
 		//does the actual loading in the GUI
 		if($("#blockArea") != undefined) {

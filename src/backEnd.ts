@@ -495,32 +495,32 @@ export class backEnd {
     
         var file : File = inputFile.prop('files')[0];
     
+        const backEndInstance = this;
         // Using a FileReader to read the contents of the file as regular text.
-        
-        /*
         var fileReader : FileReader = new FileReader();
-        fileReader.onload = function(fileLoadedEvent){
+        fileReader.onload = function(){
             //var textFromFile = fileLoadedEvent.target.result;
             var textFromFile = fileReader.result;
-            userClasses.clear();
+            backEndInstance.userClasses.clear();
             let yaml : Array<classBlock> = jsyaml.safeLoad(<string>textFromFile);
+            console.log(yaml);
             for (let i : number = 0; i < yaml.length; i++) {
-                this.userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
+                backEndInstance.userClasses.set(yaml[i][0], new classBlock(yaml[i][1]["name"]));
                 yaml[i][1]["vars"].forEach(function(j) {
-                    this.userClasses.get(yaml[i][0]).setVar(j[0], j[1]);
+                    backEndInstance.userClasses.get(yaml[i][0]).setVar(j[0], j[1]);
                 });
                 yaml[i][1]["funs"].forEach(function(j) {
-                    this.userClasses.get(yaml[i][0]).setFun(j);
+                    backEndInstance.userClasses.get(yaml[i][0]).setFun(j);
                 });
-                this.userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"]);
+                backEndInstance.userClasses.get(yaml[i][0]).setParent(yaml[i][1]["parent"], "thing");
                 yaml[i][1]["children"].forEach(function(j) {
-                    this.userClasses.get(yaml[i][0]).addChild(j);
+                    backEndInstance.userClasses.get(yaml[i][0]).addChild(j, "thing");
                 });
             }
+            
         }
 
         fileReader.readAsText(file, "UTF-8");
-        */
     }
 
     selectFile() {
